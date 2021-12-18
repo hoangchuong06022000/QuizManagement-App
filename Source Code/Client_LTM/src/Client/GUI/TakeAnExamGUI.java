@@ -5,27 +5,35 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
 
-public class TakeAnExamGUI extends JFrame 
+import models.CauHoiDTO;
+
+import Client.BUS.*;
+
+public class TakeAnExamGUI extends JDialog 
 {
+	public static ArrayList<CauHoiDTO> arrCauHoi;
 	public Color BGChinh = new Color(45, 59, 85);
 	public Color BGPhu = new Color(232, 233, 236);
 	public Color BGCam = new Color(255, 165, 0);
 	public JPanel btn;
+	public static JPanel pnChung;
 	public JTextArea txtCauHoi, txtA, txtB, txtC, txtD;
 	public ButtonGroup groupDapAn;
 	public JRadioButton rdA, rdB, rdC, rdD;
-	public JLabel lbCauHoi, lbPhut, lbGiay;
+	public JLabel lbCauHoi, lbPhut, lbGiay, lbDapAn, lbDapAnDung;
 	public static int MM, ss;
 	int interval;
 	public Timer timer;
@@ -52,24 +60,35 @@ public class TakeAnExamGUI extends JFrame
         }
     };
 	
-	public TakeAnExamGUI() 
+	public TakeAnExamGUI(JFrame parrent, ArrayList<CauHoiDTO> arrCauHoi) 
 	{
-		init();
+		TakeAnExamGUI.arrCauHoi = arrCauHoi;
+		init(parrent, arrCauHoi);
 	}
 	
-	public void init()
+	public void init(JFrame parrent, ArrayList<CauHoiDTO> arrCauHoi)
     { 
         setSize(650, 500);
         setLocationRelativeTo(null);
 		setTitle("Thực hiện thi");
-		
-        JPanel p = JPanelTakeAnExam();
-        add(p);
+        JPanel p = JPanelTakeAnExam(arrCauHoi, 0);
+        pnChung = new JPanel();    
+        pnChung.setLayout(null);
+        pnChung.setBackground(Color.WHITE);
+        pnChung.setBounds(0, 0, 650, 500);
+        pnChung.add(p);
+        JDialog frame = new JDialog(parrent, true);
+        frame.getContentPane().add(pnChung);
+		frame.pack();
+		frame.setSize(650, 500);
+		frame.setLocationRelativeTo(null);
+		frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		frame.setVisible(true);
     }
 
-	public JPanel JPanelTakeAnExam() {
+	public JPanel JPanelTakeAnExam(ArrayList<CauHoiDTO> arrCauHoi, int index) {
 		
-		int ThoiGian = 1;
+		int ThoiGian = new DeThiBUS().getThoiGianThi(arrCauHoi.get(index).getMaDeThi()) - 1;
 		String s_ThoiGian = "";
 		if(ThoiGian < 10)
 			s_ThoiGian = "0" + ThoiGian;
@@ -89,7 +108,7 @@ public class TakeAnExamGUI extends JFrame
 		p.add(lbSoCau);
 		
 		lbCauHoi = new JLabel();
-		lbCauHoi.setText("1");
+		lbCauHoi.setText(String.valueOf(arrCauHoi.get(index).getStt()));
 		lbCauHoi.setBounds(lbSoCau.getX() + lbSoCau.getWidth(), lbSoCau.getY(), 50, 30);
 		lbCauHoi.setFont(new Font("Arial", Font.BOLD, 16));
 		p.add(lbCauHoi);
@@ -116,6 +135,7 @@ public class TakeAnExamGUI extends JFrame
 		p.add(lbGiay);
 		
 		txtCauHoi= new JTextArea();
+		txtCauHoi.setText(arrCauHoi.get(index).getTenCauHoi());
 		txtCauHoi.setBounds(lbSoCau.getX(), lbSoCau.getY() + lbSoCau.getHeight() + 20, 590, 80);
 		txtCauHoi.setFont(new Font("Arial", 0, 16));
 		txtCauHoi.setEnabled(false);
@@ -131,6 +151,7 @@ public class TakeAnExamGUI extends JFrame
 		p.add(rdA);
 		
 		txtA= new JTextArea();
+		txtA.setText(arrCauHoi.get(index).getCauA());
 		txtA.setBounds(rdA.getX() + rdA.getWidth(), rdA.getY(), 230, 60);
 		txtA.setFont(new Font("Arial", 0, 16));
 		//txtA.setBorder(BorderFactory.createLineBorder(Color.black));
@@ -145,6 +166,7 @@ public class TakeAnExamGUI extends JFrame
 		p.add(rdB);
 		
 		txtB= new JTextArea();
+		txtB.setText(arrCauHoi.get(index).getCauB());
 		txtB.setBounds(rdB.getX() + rdB.getWidth(), rdB.getY(), 230, 60);
 		txtB.setFont(new Font("Arial", 0, 16));
 		//txtB.setBorder(BorderFactory.createLineBorder(Color.black));
@@ -159,6 +181,7 @@ public class TakeAnExamGUI extends JFrame
 		p.add(rdC);
 		
 		txtC= new JTextArea();
+		txtC.setText(arrCauHoi.get(index).getCauC());
 		txtC.setBounds(rdC.getX() + rdC.getWidth(), rdC.getY(), 230, 60);
 		txtC.setFont(new Font("Arial", 0, 16));
 		//txtC.setBorder(BorderFactory.createLineBorder(Color.black));
@@ -173,15 +196,30 @@ public class TakeAnExamGUI extends JFrame
 		p.add(rdD);
 		
 		txtD= new JTextArea();
+		txtD.setText(arrCauHoi.get(index).getCauD());
 		txtD.setBounds(rdD.getX() + rdD.getWidth(), rdD.getY(), 230, 60);
 		txtD.setFont(new Font("Arial", 0, 16));
 		//txtD.setBorder(BorderFactory.createLineBorder(Color.black));
 		txtD.setEnabled(false);
 		p.add(txtD);
 		
+		lbDapAn = new JLabel();
+		lbDapAn.setText("Đáp án là:");
+		lbDapAn.setBounds(rdA.getX(), txtC.getY() + txtC.getHeight() + 20, 100, 30);
+		lbDapAn.setForeground(BGChinh);
+		lbDapAn.setFont(new Font("Arial", Font.BOLD, 15));
+		p.add(lbDapAn);
+		
+		lbDapAnDung = new JLabel();
+		lbDapAnDung.setBounds(lbDapAn.getX() + lbDapAn.getWidth() + 10, txtC.getY() + txtC.getHeight() + 20, 20, 30);
+		lbDapAnDung.setForeground(BGChinh);
+		lbDapAnDung.setFont(new Font("Arial", Font.BOLD, 15));
+		p.add(lbDapAnDung);
+				
 		btn = new JPanel();
 		btn.setBackground(BGChinh);
-		btn.setBounds((p.getWidth() / 2) - 40, txtD.getY() + txtD.getHeight() + 50, 80, 30);
+		btn.setName("OK");
+		btn.setBounds((p.getWidth() / 2) - 40, lbDapAn.getY() + lbDapAn.getHeight() + 50, 80, 30);
 		btn.addMouseListener(MouseButton);
 		JLabel lb = new JLabel("OK");
 		lb.setFont(new Font("Arial", 1, 16));

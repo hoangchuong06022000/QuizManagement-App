@@ -196,14 +196,20 @@ public class CreateExamGUI extends JFrame
     			boolean checkDelCauHoi;
     			boolean checkDelDeThi;
 				try {
-					ArrayList<Integer> stt = new CauHoiBUS().getSTTByMaDeThi(maDeThi);
+					new ConnectServer(socket, out, in).readCauHoiByMaDeThi(CreateExamGUI.maDeThi, "readCauHoi");
+					System.out.println(CauHoiBUS.arrCauHoi);
+					Thread.sleep(1000);
+					ArrayList<Integer> stt = new CauHoiBUS().getSTTByMaDeThi(CreateExamGUI.maDeThi);
+					System.out.println(stt);
 					for(int i = 0; i < stt.size(); i++) {
-						checkDelCauHoi = new ConnectServer(socket, out, in).delCauHoi(i, CreateExamGUI.maDeThi, "delCauHoi");
+						checkDelCauHoi = new ConnectServer(socket, out, in).delCauHoi(stt.get(i), CreateExamGUI.maDeThi, "delCauHoi");
 					}
 					if(checkDelDeThi = new ConnectServer(socket, out, in).delDeThi(CreateExamGUI.maDeThi, "delDeThi") == true) {
 						frame.dispose();
 					}
 				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
     		}

@@ -172,11 +172,6 @@ public class ConnectServer {
                 out.flush();
                 break;
             }
-            case "readCauHoi": {
-                out.writeUTF(current_session);
-                out.flush();   
-                break;
-            }
         }
     }
     
@@ -309,6 +304,25 @@ public class ConnectServer {
 		}    
         
         return ConnectServer.check;
+    }
+    
+    public void readCauHoiByMaDeThi(String maDeThi, String current_session ){
+    	ArrayList<CauHoiDTO> arr = new ArrayList<CauHoiDTO>();
+    	try {
+    		out.writeUTF(current_session);
+            out.writeUTF(maDeThi);
+            out.flush();
+            receive();
+            Thread.sleep(1000);
+    	}catch (StreamCorruptedException ex) {
+            Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
+    	}catch (EOFException ex) {
+            Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
+    	}catch (NullPointerException ex) {
+            Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
     }
     
     public boolean addOrModCauHoi(CauHoiDTO cauHoi, String current_session) throws IOException{

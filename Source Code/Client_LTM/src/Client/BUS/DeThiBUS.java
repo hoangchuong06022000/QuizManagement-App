@@ -21,6 +21,15 @@ public class DeThiBUS {
         return Pkey;
     }
     
+    public int getThoiGianThi(String maDeThi) {
+    	for (DeThiDTO e : arrDeThi){
+            if(e.getMaDeThi().equals(maDeThi)) {
+            	return e.getThoiGianThi();
+            }
+        }
+    	return 0;
+    }
+    
     public ArrayList<DeThiDTO> getArrDeThi() {
         return arrDeThi;
     }

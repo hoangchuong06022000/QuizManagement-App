@@ -3,6 +3,8 @@ package Client.BUS;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Random;
+
 import models.CauHoiDTO;
 
 
@@ -17,15 +19,32 @@ public class CauHoiBUS {
         return arrCauHoi;
     }
     
+    public ArrayList<CauHoiDTO> SortRandomCauHoi() {
+    	Random rand = new Random();
+    	ArrayList<CauHoiDTO> arrOut = new ArrayList<CauHoiDTO>();
+
+    	int len = arrCauHoi.size();
+    	for(int i = 0; i < len;) {
+    		int randomIndex = rand.nextInt(arrCauHoi.size());
+	        CauHoiDTO randomItem = arrCauHoi.get(randomIndex);
+	        if(!arrOut.contains(randomItem)) {
+	        	arrOut.add(randomItem);
+		        len--;
+	        }		        
+    	}
+    	return arrOut;
+    }
+    
     public ArrayList<Integer> getSTTByMaDeThi(String maDeThi) {
     	ArrayList<Integer> stt = new ArrayList<>();
     	for (CauHoiDTO e : arrCauHoi){
-            if(e.getMaDeThi() == maDeThi) {
+            if(e.getMaDeThi().equals(maDeThi)) {
             	stt.add(e.getStt());
             }
         }
     	return stt;
     }
+    
     public int getSoLuongCauHoi(){
         return arrCauHoi.size();
     }

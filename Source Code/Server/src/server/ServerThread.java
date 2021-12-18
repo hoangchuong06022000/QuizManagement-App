@@ -297,7 +297,8 @@ public class ServerThread implements Runnable{
                         }
                         case "readCauHoi": {
                         	try {
-                        		arrCauHoi = new CauHoiDAO().readCauHoi();
+                        		String maDeThi = in.readUTF();
+                        		arrCauHoi = new CauHoiDAO().readCauHoiByMaDeThi(maDeThi);
                                 send(current_session);            				
                             }catch (StreamCorruptedException ex) {
             	                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);

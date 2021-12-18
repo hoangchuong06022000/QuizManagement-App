@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -19,13 +20,17 @@ import java.util.TimerTask;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import Client.BUS.CauHoiBUS;
+import Client.BUS.ConnectServer;
 import Client.BUS.DeThiBUS;
 import Client.BUS.UserBUS;
+import models.CauHoiDTO;
 import models.DeThiDTO;
 
 
@@ -36,6 +41,7 @@ public class MainGUI extends JFrame
 	public static String userName = "";
 	public static ObjectInputStream in;
     public static ObjectOutputStream out;
+    ConnectServer conn;
 	public JPanel pLeft, pCenter, pBoDeThi;
 	private JPanel[] pnDanhMuc, pnPhanTrang; 
     private JLabel[] lbDanhMuc;
@@ -79,11 +85,19 @@ public class MainGUI extends JFrame
         	JPanel src =(JPanel) me.getSource();
             switch (src.getName()) {
 				case "Tham gia thi":{
-					SetBGDanhMuc();
-					pnDanhMuc[0].setBackground(BGCam);
-        			LuaChon = src.getName().toString();
-                    XoaPhanNoiDung(src);
-					break;
+					try {
+						conn = new ConnectServer(socket, "readDeThi", out, in);
+						SetBGDanhMuc();
+						pnDanhMuc[0].setBackground(BGCam);
+	        			LuaChon = src.getName().toString();
+	                    XoaPhanNoiDung(src);
+	                    Thread.sleep(1000);
+						break;
+					} catch (IOException e) {	
+						e.printStackTrace();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}	
 				}
 				case "Tạo đề thi":{
 					SetBGDanhMuc();
@@ -327,7 +341,7 @@ public class MainGUI extends JFrame
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				ThucHienThi();
+				ThucHienThi(De.getMaDeThi());
 			}
 		});
     	btnThi.setName(De.getMaDeThi());
@@ -386,9 +400,17 @@ public class MainGUI extends JFrame
 	     pCenter.repaint();
     }
 	
-	public void ThucHienThi()
+	public void ThucHienThi(String maDeThi)
     {		
-		JFrame frame = new TakeAnExamGUI();
-		frame.setVisible(true);
+		new ConnectServer(socket, out, in).readCauHoiByMaDeThi(maDeThi, "readCauHoi");
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		ArrayList<CauHoiDTO> arrRandom = new CauHoiBUS().SortRandomCauHoi();
+		MainGUI parrent = new MainGUI(userName);
+		new TakeAnExamGUI(parrent, arrRandom);	
     }
 }
