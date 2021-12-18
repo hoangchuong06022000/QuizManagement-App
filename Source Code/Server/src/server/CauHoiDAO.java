@@ -58,7 +58,7 @@ public class CauHoiDAO {
         return check;
     }
 
-    public Boolean del(String stt, String maDeThi){
+    public Boolean del(int stt, String maDeThi){
         db = new DBConnection();
         Boolean check = db.SQLUpdate("DELETE FROM CauHoi WHERE CauHoi.stt = " + stt + " AND CauHoi.maDeThi = '" + maDeThi + "'");
         db.closeConnection();

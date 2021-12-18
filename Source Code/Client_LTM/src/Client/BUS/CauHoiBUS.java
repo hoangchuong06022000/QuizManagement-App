@@ -17,6 +17,15 @@ public class CauHoiBUS {
         return arrCauHoi;
     }
     
+    public ArrayList<Integer> getSTTByMaDeThi(String maDeThi) {
+    	ArrayList<Integer> stt = new ArrayList<>();
+    	for (CauHoiDTO e : arrCauHoi){
+            if(e.getMaDeThi() == maDeThi) {
+            	stt.add(e.getStt());
+            }
+        }
+    	return stt;
+    }
     public int getSoLuongCauHoi(){
         return arrCauHoi.size();
     }

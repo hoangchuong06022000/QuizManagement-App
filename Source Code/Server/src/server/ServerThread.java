@@ -40,7 +40,7 @@ public class ServerThread implements Runnable{
                 String current = null;
                 while(true) {       
             		System.err.println("wait receive!!");
-            		Thread.sleep(2000);
+            		Thread.sleep(1000);
                     current = in.readUTF();
                     System.out.println("receive = "+current);
                     ServerThread.current_session = current;
@@ -355,7 +355,7 @@ public class ServerThread implements Runnable{
                         	try {
                         		String stt = in.readUTF();
                                 String maDeThi = in.readUTF();
-                                check = new CauHoiDAO().del(stt, maDeThi);
+                                check = new CauHoiDAO().del(Integer.parseInt(stt), maDeThi);
                                 send(current_session);            				
                             }catch (StreamCorruptedException ex) {
             	                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
