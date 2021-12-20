@@ -118,6 +118,24 @@ public class ConnectServer {
             				}    
                             
                         }
+                        case "readDiemByMaDe": {
+                        	try {
+                        		Object tmp = in.readObject();
+                                DiemBUS.arrDiemByMaDe = (ArrayList<DiemDTO>) exec.convertObjectToList(tmp);
+                                break;
+                        	}catch (StreamCorruptedException ex) {
+            	                Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
+            	        	}catch (EOFException ex) {
+            	                Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
+            	        	}catch (NullPointerException ex) {
+            	                Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex); 
+            	        	}catch (IOException ex) {
+            	                Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
+            	        	} catch (Exception e) {
+            					e.printStackTrace();
+            				}    
+                            
+                        }
                         case "readCauHoi": {
                         	try {
                         		Object tmp = in.readObject();
@@ -306,8 +324,25 @@ public class ConnectServer {
         return ConnectServer.check;
     }
     
+    public void readDiemByMaDeThi(String maDeThi, String current_session ){
+    	try {
+    		out.writeUTF(current_session);
+            out.writeUTF(maDeThi);
+            out.flush();
+            receive();
+            Thread.sleep(1000);
+    	}catch (StreamCorruptedException ex) {
+            Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
+    	}catch (EOFException ex) {
+            Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
+    	}catch (NullPointerException ex) {
+            Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex); 
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+    }
+    
     public void readCauHoiByMaDeThi(String maDeThi, String current_session ){
-    	ArrayList<CauHoiDTO> arr = new ArrayList<CauHoiDTO>();
     	try {
     		out.writeUTF(current_session);
             out.writeUTF(maDeThi);

@@ -2,6 +2,7 @@ package Client.GUI;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
@@ -47,7 +48,7 @@ public class LoginGUI extends JFrame {
     public static ObjectInputStream in;
     public static ObjectOutputStream out;
     private JPanel contentPane;
-    public static JPanel pnDangNhap, pnDangKy, pnForm;
+    public static JPanel pnDangNhap, pnDangKy, pnForm, pnNorth;
     public static JLabel lbDangNhap, lbDangKy, lbUser, lbPass, lbXacNhan, lbHoTen, lbGioiTinh, lbNgaySinh;
     public static JPasswordField txtPass, txtXacNhan;
     public static JTextField txtUser, txtHoTen;
@@ -96,11 +97,12 @@ public class LoginGUI extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(300, 150, 450, 300);
         setSize(700, 440);
-        setLayout(null);
+        setLayout(new BorderLayout(1,2));
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         contentPane.setLayout(new BorderLayout(0, 0));
         setContentPane(contentPane);
+        
         pnDangNhap = new JPanel();
         pnDangNhap.setName("Đăng nhập");
         pnDangNhap.setBounds(0, 0, getWidth() / 2, 50);
@@ -110,8 +112,7 @@ public class LoginGUI extends JFrame {
         lbDangNhap.setForeground(Color.WHITE);
         lbDangNhap.setBounds(pnDangNhap.getWidth()/2, pnDangNhap.getHeight(), 100, 50);
         pnDangNhap.add(lbDangNhap);
-        pnDangNhap.addMouseListener(MouseEV);
-        add(pnDangNhap);
+        pnDangNhap.addMouseListener(MouseEV);       
 
         pnDangKy = new JPanel();
         pnDangKy.setName("Đăng ký");
@@ -123,14 +124,23 @@ public class LoginGUI extends JFrame {
         lbDangKy.setBounds(pnDangKy.getWidth()/2, pnDangKy.getHeight(), 100, 50);
         pnDangKy.add(lbDangKy);
         pnDangKy.addMouseListener(MouseEV);
-        add(pnDangKy);
+        
+        pnNorth = new JPanel();
+        pnNorth.setPreferredSize(new Dimension(700, 50));
+        pnNorth.setLayout(null);
+        pnNorth.add(pnDangNhap);
+        pnNorth.add(pnDangKy);
+        add(pnNorth, BorderLayout.NORTH);
 
         pnForm = new JPanel();
         pnForm.setLayout(null);
-        pnForm.setBounds(0,pnDangNhap.getY() + pnDangNhap.getHeight(), pnDangKy.getWidth() * 2, 350);
+        pnForm.setBounds(0, 0, pnDangKy.getWidth() * 2, 350);
         pnForm.setBackground(Color.white);
         pnForm.add(JPanelDangNhap());
-        add(pnForm);
+        add(pnForm, BorderLayout.CENTER);
+    }
+    public LoginGUI(int i) {
+    	init();
     }
     public LoginGUI() {
         init();
@@ -369,7 +379,55 @@ public class LoginGUI extends JFrame {
 		}    		
     }
     
+    public boolean checkInputDangKy(String userName, String password, String hoTen, String re_password) {
+		if (userName.equals("")){
+            error_mess = "User Name trống!!!";
+            return false;
+        }
+		else if (!userName.endsWith("@gmail.com")){
+            error_mess = "User Name phải là email!!!";
+            return false;
+        } 
+		else if (password.equals("")){
+            error_mess = "Password trống!!!";
+            return false;
+        } 
+        else if (re_password.equals("")){
+            error_mess = "Bạn chưa nhập lại password!!!";
+            return false;
+        }else if(!password.equals(re_password)) {
+        	error_mess = "Password nhập lại không trùng khớp!!!";
+            return false;
+        }
+        else if (hoTen.equals("")){
+            error_mess = "Họ Tên trống!!!";
+            return false;
+        } 
+        
+        return true;
+	}
+    
     public void btnDangKyActionPerformed(java.awt.event.ActionEvent evt) {
-    	
+    	String userName = txtUser.getText();
+    	String password = txtPass.getText();
+    	String re_password = txtXacNhan.getText();
+    	String hoTen = txtHoTen.getText();
+    	SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
+    	String ngSinh = String.valueOf(formater.format(txtNgaySinh.getDate()));
+    	int gioiTinh;
+    	if (!rdNam.isSelected()){
+            gioiTinh = 1;
+        }else {
+        	if (!rdNu.isSelected()){
+        		gioiTinh = 0;
+        	}else {
+        		JOptionPane.showMessageDialog(null, "Bạn chưa chọn giới tính!!");
+        	}
+        }
+    	if(checkInputDangKy(userName, password, hoTen, re_password)) {
+    		
+    	}else {
+    		JOptionPane.showMessageDialog(null, error_mess);
+    	}
     }
 }

@@ -19,6 +19,7 @@ public class ServerThread implements Runnable{
     public static Boolean check;
     public static ArrayList<UserDTO> arrUser;
     public static ArrayList<DiemDTO> arrDiem;
+    public static ArrayList<DiemDTO> arrDiemByMaDe;
     public static ArrayList<DeThiDTO> arrDeThi;
     public static ArrayList<CauHoiDTO> arrCauHoi;
     ObjectOutputStream out;
@@ -237,6 +238,25 @@ public class ServerThread implements Runnable{
                             
                             break;
                         }
+                        case "readDiemByMaDe": {
+                        	try {
+                        		String maDeThi = in.readUTF();
+                        		arrDiemByMaDe = new DiemDAO().readDiemByMaDeThi(maDeThi);
+                                send(current_session);            				
+                            }catch (StreamCorruptedException ex) {
+            	                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+            	        	}catch (EOFException ex) {
+            	                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+            	        	}catch (NullPointerException ex) {
+            	                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex); 
+            	        	}catch (IOException ex) {
+            	                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+            	        	} catch (Exception e) {
+            					e.printStackTrace();
+            				}
+                            
+                            break;
+                        }
                         case "addDiem": {
                         	try {
                         		DiemDTO diem = (DiemDTO) in.readObject();
@@ -424,6 +444,25 @@ public class ServerThread implements Runnable{
             	try {
             		out.writeUTF(current_session);
                     out.writeObject(arrDiem);
+                    out.flush();
+	            }catch (StreamCorruptedException ex) {
+	                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+	        	}catch (EOFException ex) {
+	                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+	        	}catch (NullPointerException ex) {
+	                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+	        	}catch (IOException ex) {
+	                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+	            }catch (Exception ex) {
+	                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);
+	        	}
+            	
+                break;
+            }
+            case "readDiemByMaDe": {
+            	try {
+            		out.writeUTF(current_session);
+                    out.writeObject(arrDiemByMaDe);
                     out.flush();
 	            }catch (StreamCorruptedException ex) {
 	                Logger.getLogger(ServerThread.class.getName()).log(Level.SEVERE, null, ex);

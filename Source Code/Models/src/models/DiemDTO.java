@@ -9,14 +9,15 @@ public class DiemDTO implements Serializable{
 	 */
 	private static final long serialVersionUID = 7953837297898294457L;
 	String userName, maDeThi;
-    int diem, thuHang;
+	float diem;
+    int thuHang;
     
-    public DiemDTO(int diem, int thuHang) {
+    public DiemDTO(float diem, int thuHang) {
         this.diem = diem;
         this.thuHang = thuHang;
     }    
 
-    public DiemDTO(String maDeThi, String userName, int diem, int thuHang) {
+    public DiemDTO(String maDeThi, String userName, float diem, int thuHang) {
         this.userName = userName;
         this.maDeThi = maDeThi;
         this.diem = diem;
@@ -39,7 +40,7 @@ public class DiemDTO implements Serializable{
         this.maDeThi = maDeThi;
     }
 
-    public int getDiem() {
+    public float getDiem() {
         return diem;
     }
 

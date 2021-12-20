@@ -161,32 +161,36 @@ public class CreateExamGUI extends JFrame
 		if(p.getName().equals("Continue")) {
 			String maDeThi = new ExecuteED().next_maDeThi(new DeThiBUS().getPKey());
 			CreateExamGUI.maDeThi = maDeThi;
-			String tenDeThi = txtTenDeThi.getText();			
-			DeThiDTO deThi = new DeThiDTO(maDeThi, tenDeThi, soCauHoi, thoiGianThi, 0, CreateExamGUI.userName);
-			try {
-				boolean check;
-				if(check = new ConnectServer(socket, out, in).addOrModDeThi(deThi, "addDeThi") == true) {
-					JOptionPane.showMessageDialog(null, "Thêm Đề Thi thành công!!");
-					CreateExamGUI parrentFrame = new CreateExamGUI(userName);
-					frame = new JDialog(parrentFrame, true);
-					frame.getContentPane().add(JPanelCauHoi(soCauHoi, thoiGianThi, 1));
-					frame.pack();
-					frame.setSize(650, 500);
-					frame.setLocationRelativeTo(null);
-					frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-					frame.setVisible(true);
-				}
-			}catch (StreamCorruptedException ex) {
-                Logger.getLogger(CreateExamGUI.class.getName()).log(Level.SEVERE, null, ex);
-        	}catch (EOFException ex) {
-                Logger.getLogger(CreateExamGUI.class.getName()).log(Level.SEVERE, null, ex);
-        	}catch (SocketException ex) {
-                Logger.getLogger(CreateExamGUI.class.getName()).log(Level.SEVERE, null, ex);
-        	}catch (NullPointerException ex) {
-                Logger.getLogger(CreateExamGUI.class.getName()).log(Level.SEVERE, null, ex); 
-            } catch (Exception ex) {
-                Logger.getLogger(CreateExamGUI.class.getName()).log(Level.SEVERE, null, ex);
-            }
+			if(txtTenDeThi.getText().equals("")) {
+				JOptionPane.showMessageDialog(null, "Tên đề thi trống!!");
+			}else {
+				String tenDeThi = txtTenDeThi.getText();			
+				DeThiDTO deThi = new DeThiDTO(maDeThi, tenDeThi, soCauHoi, thoiGianThi, 0, CreateExamGUI.userName);
+				try {
+					boolean check;
+					if(check = new ConnectServer(socket, out, in).addOrModDeThi(deThi, "addDeThi") == true) {
+						JOptionPane.showMessageDialog(null, "Thêm Đề Thi thành công!!");
+						CreateExamGUI parrentFrame = new CreateExamGUI(userName);
+						frame = new JDialog(parrentFrame, true);
+						frame.getContentPane().add(JPanelCauHoi(soCauHoi, thoiGianThi, 1));
+						frame.pack();
+						frame.setSize(650, 500);
+						frame.setLocationRelativeTo(null);
+						frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+						frame.setVisible(true);
+					}
+				}catch (StreamCorruptedException ex) {
+	                Logger.getLogger(CreateExamGUI.class.getName()).log(Level.SEVERE, null, ex);
+	        	}catch (EOFException ex) {
+	                Logger.getLogger(CreateExamGUI.class.getName()).log(Level.SEVERE, null, ex);
+	        	}catch (SocketException ex) {
+	                Logger.getLogger(CreateExamGUI.class.getName()).log(Level.SEVERE, null, ex);
+	        	}catch (NullPointerException ex) {
+	                Logger.getLogger(CreateExamGUI.class.getName()).log(Level.SEVERE, null, ex); 
+	            } catch (Exception ex) {
+	                Logger.getLogger(CreateExamGUI.class.getName()).log(Level.SEVERE, null, ex);
+	            }
+			}
     	}	 		
 	}
 	public void XoaDeThi(JPanel p) {

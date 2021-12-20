@@ -121,7 +121,7 @@ public class MainGUI extends JFrame
 	        		int select = JOptionPane.showConfirmDialog(null, "Bạn có muốn đăng xuất không?", "Lựa chọn của bạn", JOptionPane.YES_NO_OPTION);
 	        		if (select == JOptionPane.YES_OPTION) {
 	        			dispose();
-	                    new LoginGUI().setVisible(true);
+	                    new LoginGUI(0).setVisible(true);
 	        		}
 					break;			
 				}
@@ -411,6 +411,7 @@ public class MainGUI extends JFrame
 		
 		ArrayList<CauHoiDTO> arrRandom = new CauHoiBUS().SortRandomCauHoi();
 		MainGUI parrent = new MainGUI(userName);
+		new TakeAnExamGUI(userName, socket, out, in);
 		new TakeAnExamGUI(parrent, arrRandom);	
     }
 }

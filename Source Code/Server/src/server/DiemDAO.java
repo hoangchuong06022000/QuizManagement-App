@@ -36,6 +36,32 @@ public class DiemDAO {
         
         return arrDiem;
     }
+    public ArrayList<DiemDTO> readDiemByMaDeThi(String maDe){
+        db = new DBConnection();
+        ArrayList<DiemDTO> arrDiem = new ArrayList<>();
+        
+        try{
+            String query = "SELECT * FROM DiemWhere maDeThi='" + maDe + "'";
+            ResultSet rs = db.SQLQuery(query);
+            if (rs != null){
+                while (rs.next()){
+                    String maDeThi = rs.getString("maDeThi");
+                    String userName = rs.getString("userName");
+                    int diem = rs.getInt("diem");
+                    int thuHang = rs.getInt("thuHang");
+                    arrDiem.add(new DiemDTO(maDeThi, userName, diem, thuHang));
+                }
+            }
+        }
+        catch (SQLException ex){
+        	JOptionPane.showMessageDialog(null, "Lỗi!!! Lỗi đọc dữ liệu bảng Diem");
+        } 
+        finally{
+            db.closeConnection();
+        }
+        
+        return arrDiem;
+    }
     
     public Boolean add(DiemDTO diem){
         db = new DBConnection();

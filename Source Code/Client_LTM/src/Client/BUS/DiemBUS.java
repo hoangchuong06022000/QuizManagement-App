@@ -3,15 +3,31 @@ package Client.BUS;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+
 import models.DiemDTO;
 
 
 public class DiemBUS {
     public static ArrayList<DiemDTO> arrDiem = new ArrayList<>();
+    public static ArrayList<DiemDTO> arrDiemByMaDe = new ArrayList<>();
     public static ConnectServer conn;
     
     public DiemBUS() {
     } 
+    
+    public int XepHangTheoMaDeThi(float diem) {
+    	HashMap<Integer, Float> arrXepHang = new HashMap<>();
+    	for (DiemDTO e : arrDiemByMaDe){
+            if(e.getDiem() < diem) {
+            	arrXepHang.put(e.getThuHang(), e.getDiem());
+            }
+        }
+    	for (float i : arrXepHang.keySet()) {
+    	      System.out.println(i);
+    	}
+    	return 0;
+    }
     
     public ArrayList<DiemDTO> getArrDiem() {
         return arrDiem;

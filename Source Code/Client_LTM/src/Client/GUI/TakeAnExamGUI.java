@@ -2,9 +2,13 @@ package Client.GUI;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -14,6 +18,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
@@ -25,17 +30,23 @@ import Client.BUS.*;
 public class TakeAnExamGUI extends JDialog 
 {
 	public static ArrayList<CauHoiDTO> arrCauHoi;
+	public static String userName;
+	public static Socket socket;
+	public static ObjectInputStream in;
+    public static ObjectOutputStream out;
 	public Color BGChinh = new Color(45, 59, 85);
 	public Color BGPhu = new Color(232, 233, 236);
 	public Color BGCam = new Color(255, 165, 0);
-	public JPanel btn;
-	public static JPanel pnChung;
+	public JPanel btn, pnNorth, pnCenter;
+	public static JDialog frame;
 	public JTextArea txtCauHoi, txtA, txtB, txtC, txtD;
 	public ButtonGroup groupDapAn;
 	public JRadioButton rdA, rdB, rdC, rdD;
 	public JLabel lbCauHoi, lbPhut, lbGiay, lbDapAn, lbDapAnDung;
 	public static int MM, ss;
 	int interval;
+	public static int soCauDung, count = 0;
+	public static float diem = 0;
 	public Timer timer;
 	
 	public MouseAdapter MouseButton = new MouseAdapter() 
@@ -56,14 +67,143 @@ public class TakeAnExamGUI extends JDialog
         @Override
         public void mouseClicked(MouseEvent me)
         {
-           
+        	JPanel src =(JPanel) me.getSource();
+        	try {
+				ChonDapAn(src);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         }
     };
-	
+	public TakeAnExamGUI(String userName, Socket socket, ObjectOutputStream out, ObjectInputStream in) {
+		TakeAnExamGUI.userName = userName;
+		TakeAnExamGUI.socket = socket;
+		TakeAnExamGUI.out = out;
+		TakeAnExamGUI.in = in;
+	}
 	public TakeAnExamGUI(JFrame parrent, ArrayList<CauHoiDTO> arrCauHoi) 
 	{
 		TakeAnExamGUI.arrCauHoi = arrCauHoi;
 		init(parrent, arrCauHoi);
+	}
+	
+	public void ChonDapAn(JPanel p) throws InterruptedException {
+		
+		String dapAn = "";
+		System.out.println("chua select: " + dapAn);
+		if(rdA.isSelected()) {
+			dapAn = txtA.getText();
+			if(p.getName().equals("OK")) {				
+				if(count < TakeAnExamGUI.arrCauHoi.size()) {
+					if(TakeAnExamGUI.arrCauHoi.get(count).getDapAn().equals(dapAn)) {
+						
+						//new ConnectServer(socket, out, in).addOrModDiem(diemUser, "addDiem");
+						soCauDung++;
+						JOptionPane.showMessageDialog(null, "Bạn trả lời đúng!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
+					}else {
+						JOptionPane.showMessageDialog(null, "Bạn trả lời sai!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
+					}
+					count++;
+					if(count == TakeAnExamGUI.arrCauHoi.size() - 1) {
+						diem = (float) 10/TakeAnExamGUI.arrCauHoi.size()*soCauDung;
+						JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + " câu \n Số điểm của bạn là: " + diem);
+						frame.dispose();
+					}else {
+						pnCenter.removeAll();
+						pnCenter.validate();
+						pnCenter.repaint();
+						pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi, count));
+						pnCenter.validate();
+						pnCenter.repaint();
+					}
+					
+				}	
+			}
+		}
+		else if(rdB.isSelected()){
+			dapAn = txtB.getText();
+
+			if(p.getName().equals("OK")) {
+				if(count < TakeAnExamGUI.arrCauHoi.size()) {
+					if(TakeAnExamGUI.arrCauHoi.get(count).getDapAn().equals(dapAn)) {
+						soCauDung++;
+						JOptionPane.showMessageDialog(null, "Bạn trả lời đúng!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
+					}else {
+						JOptionPane.showMessageDialog(null, "Bạn trả lời sai!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
+					}
+					count++;
+					if(count == TakeAnExamGUI.arrCauHoi.size() - 1) {
+						diem = (float) 10/TakeAnExamGUI.arrCauHoi.size()*soCauDung;
+						JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + " câu \n Số điểm của bạn là: " + diem);
+						frame.dispose();
+					}else {
+						pnCenter.removeAll();
+						pnCenter.validate();
+						pnCenter.repaint();
+						pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi, count));
+						pnCenter.validate();
+						pnCenter.repaint();
+					}
+				}	
+			}
+		}
+		else if(rdC.isSelected()){
+			dapAn = txtC.getText();
+
+			if(p.getName().equals("OK")) {
+				if(count < TakeAnExamGUI.arrCauHoi.size()) {
+					if(TakeAnExamGUI.arrCauHoi.get(count).getDapAn().equals(dapAn)) {
+						soCauDung++;
+						JOptionPane.showMessageDialog(null, "Bạn trả lời đúng!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
+					}else {
+						JOptionPane.showMessageDialog(null, "Bạn trả lời sai!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
+					}
+					count++;
+					if(count == TakeAnExamGUI.arrCauHoi.size() - 1) {
+						diem = (float) 10/TakeAnExamGUI.arrCauHoi.size()*soCauDung;
+						JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + " câu \n Số điểm của bạn là: " + diem);
+						frame.dispose();
+					}else {
+						pnCenter.removeAll();
+						pnCenter.validate();
+						pnCenter.repaint();
+						pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi, count));
+						pnCenter.validate();
+						pnCenter.repaint();
+					}
+				}	
+			}
+		}
+		else if(rdD.isSelected()){
+			dapAn = txtD.getText();
+
+			if(p.getName().equals("OK")) {
+				if(count < TakeAnExamGUI.arrCauHoi.size()) {
+					if(TakeAnExamGUI.arrCauHoi.get(count).getDapAn().equals(dapAn)) {
+						soCauDung++;
+						JOptionPane.showMessageDialog(null, "Bạn trả lời đúng!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
+					}else {
+						JOptionPane.showMessageDialog(null, "Bạn trả lời sai!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
+					}
+					count++;
+					if(count == TakeAnExamGUI.arrCauHoi.size() - 1) {
+						diem = (float) 10/TakeAnExamGUI.arrCauHoi.size()*soCauDung;
+						JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + " câu \n Số điểm của bạn là: " + diem);
+						frame.dispose();
+					}else {
+						pnCenter.removeAll();
+						pnCenter.validate();
+						pnCenter.repaint();
+						pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi, count));
+						pnCenter.validate();
+						pnCenter.repaint();
+					}
+				}	
+			}
+		}else {
+			JOptionPane.showMessageDialog(null, "Bạn chưa chọn đáp án!!");
+		}
 	}
 	
 	public void init(JFrame parrent, ArrayList<CauHoiDTO> arrCauHoi)
@@ -71,23 +211,24 @@ public class TakeAnExamGUI extends JDialog
         setSize(650, 500);
         setLocationRelativeTo(null);
 		setTitle("Thực hiện thi");
-        JPanel p = JPanelTakeAnExam(arrCauHoi, 0);
-        pnChung = new JPanel();    
-        pnChung.setLayout(null);
-        pnChung.setBackground(Color.WHITE);
-        pnChung.setBounds(0, 0, 650, 500);
-        pnChung.add(p);
-        JDialog frame = new JDialog(parrent, true);
-        frame.getContentPane().add(pnChung);
+        pnNorth = JPanelThoiGianThi(arrCauHoi, 0);
+        pnNorth.setPreferredSize(new Dimension(650, 40));
+        pnCenter = new JPanel();
+        pnCenter.setBounds(0, 0, 650, 460);
+        pnCenter.setLayout(null);
+        pnCenter.add(JPanelTakeAnExam(arrCauHoi, 0));
+        frame = new JDialog(parrent, true);
+        frame.setLayout(new BorderLayout(1,2));
 		frame.pack();
 		frame.setSize(650, 500);
 		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		frame.add(pnNorth, BorderLayout.NORTH);
+        frame.add(pnCenter, BorderLayout.CENTER);
 		frame.setVisible(true);
     }
-
-	public JPanel JPanelTakeAnExam(ArrayList<CauHoiDTO> arrCauHoi, int index) {
-		
+	
+	public JPanel JPanelThoiGianThi(ArrayList<CauHoiDTO> arrCauHoi, int index) {
 		int ThoiGian = new DeThiBUS().getThoiGianThi(arrCauHoi.get(index).getMaDeThi()) - 1;
 		String s_ThoiGian = "";
 		if(ThoiGian < 10)
@@ -95,27 +236,12 @@ public class TakeAnExamGUI extends JDialog
 		else
 			s_ThoiGian = "" + ThoiGian;
 		JPanel p = new JPanel();
-		p.setLayout(new BorderLayout(2,1));
-		
-		p.setLayout(null);
-		p.setBackground(Color.WHITE);
-		p.setBounds(0, 0, 650, 500);
-		
-		JLabel lbSoCau = new JLabel();
-		lbSoCau.setText("Câu hỏi : ");
-		lbSoCau.setBounds(20, 10, 90, 30);
-		lbSoCau.setFont(new Font("Arial", Font.BOLD, 16));
-		p.add(lbSoCau);
-		
-		lbCauHoi = new JLabel();
-		lbCauHoi.setText(String.valueOf(arrCauHoi.get(index).getStt()));
-		lbCauHoi.setBounds(lbSoCau.getX() + lbSoCau.getWidth(), lbSoCau.getY(), 50, 30);
-		lbCauHoi.setFont(new Font("Arial", Font.BOLD, 16));
-		p.add(lbCauHoi);
-		
+        p.setLayout(null);
+        p.setBounds(0, 0, 650, 40);
+        
 		lbPhut = new JLabel();
 		lbPhut.setText(s_ThoiGian);
-		lbPhut.setBounds(lbCauHoi.getX() + lbCauHoi.getWidth() + 400, lbCauHoi.getY(), 25, 30);
+		lbPhut.setBounds(470, 10, 25, 30);
 		lbPhut.setForeground(BGChinh);
 		lbPhut.setFont(new Font("Arial", Font.BOLD, 20));
 		p.add(lbPhut);
@@ -134,12 +260,42 @@ public class TakeAnExamGUI extends JDialog
 		lbGiay.setFont(new Font("Arial", Font.BOLD, 20));
 		p.add(lbGiay);
 		
+		DemNguocThoiGian(ThoiGian);
+        
+        return p;
+	}
+	
+	public JPanel JPanelTakeAnExam(ArrayList<CauHoiDTO> arrCauHoi, int index) {
+
+		JPanel p = new JPanel();
+		p.setLayout(new BorderLayout(2,1));
+		
+		p.setLayout(null);
+		p.setBackground(Color.WHITE);
+		p.setBounds(0, 0, 650, 460);
+		
+		JLabel lbSoCau = new JLabel();
+		lbSoCau.setText("Câu hỏi : ");
+		lbSoCau.setBounds(20, 10, 90, 30);
+		lbSoCau.setFont(new Font("Arial", Font.BOLD, 16));
+		p.add(lbSoCau);
+		
+		lbCauHoi = new JLabel();
+		lbCauHoi.setText(String.valueOf(arrCauHoi.get(index).getStt()));
+		lbCauHoi.setBounds(lbSoCau.getX() + lbSoCau.getWidth(), lbSoCau.getY(), 50, 30);
+		lbCauHoi.setFont(new Font("Arial", Font.BOLD, 16));
+		p.add(lbCauHoi);
+		
 		txtCauHoi= new JTextArea();
 		txtCauHoi.setText(arrCauHoi.get(index).getTenCauHoi());
-		txtCauHoi.setBounds(lbSoCau.getX(), lbSoCau.getY() + lbSoCau.getHeight() + 20, 590, 80);
-		txtCauHoi.setFont(new Font("Arial", 0, 16));
-		txtCauHoi.setEnabled(false);
-		txtCauHoi.setBorder(BorderFactory.createLineBorder(Color.black));
+		txtCauHoi.setBounds(lbSoCau.getX(), lbSoCau.getY() + lbSoCau.getHeight() + 10, 600, 120);
+		txtCauHoi.setFont(new Font("Arial", Font.ITALIC, 16));
+		txtCauHoi.setForeground(Color.black);
+		txtCauHoi.setEditable(false);
+		//txtCauHoi.setEnabled(false);
+		//txtCauHoi.setBorder(BorderFactory.createLineBorder(Color.black));
+		txtCauHoi.setLineWrap(true);
+		txtCauHoi.setWrapStyleWord(true);
 		p.add(txtCauHoi);
 		
 		groupDapAn = new ButtonGroup();
@@ -152,10 +308,14 @@ public class TakeAnExamGUI extends JDialog
 		
 		txtA= new JTextArea();
 		txtA.setText(arrCauHoi.get(index).getCauA());
-		txtA.setBounds(rdA.getX() + rdA.getWidth(), rdA.getY(), 230, 60);
+		txtA.setBounds(rdA.getX() + rdA.getWidth(), rdA.getY()+5, 230, 60);
 		txtA.setFont(new Font("Arial", 0, 16));
+		txtA.setForeground(Color.black);
 		//txtA.setBorder(BorderFactory.createLineBorder(Color.black));
-		txtA.setEnabled(false);
+		txtA.setLineWrap(true);
+		txtA.setWrapStyleWord(true);
+		txtA.setEditable(false);
+		//txtA.setEnabled(false);
 		p.add(txtA);
 		
 		rdB = new JRadioButton("B/ ");
@@ -167,10 +327,14 @@ public class TakeAnExamGUI extends JDialog
 		
 		txtB= new JTextArea();
 		txtB.setText(arrCauHoi.get(index).getCauB());
-		txtB.setBounds(rdB.getX() + rdB.getWidth(), rdB.getY(), 230, 60);
+		txtB.setBounds(rdB.getX() + rdB.getWidth(), rdB.getY()+5, 230, 60);
 		txtB.setFont(new Font("Arial", 0, 16));
+		txtB.setForeground(Color.black);
 		//txtB.setBorder(BorderFactory.createLineBorder(Color.black));
-		txtB.setEnabled(false);
+		txtB.setLineWrap(true);
+		txtB.setWrapStyleWord(true);
+		txtB.setEditable(false);
+		//txtB.setEnabled(false);
 		p.add(txtB);
 		
 		rdC = new JRadioButton("C/ ");
@@ -182,10 +346,14 @@ public class TakeAnExamGUI extends JDialog
 		
 		txtC= new JTextArea();
 		txtC.setText(arrCauHoi.get(index).getCauC());
-		txtC.setBounds(rdC.getX() + rdC.getWidth(), rdC.getY(), 230, 60);
+		txtC.setBounds(rdC.getX() + rdC.getWidth(), rdC.getY()+5, 230, 60);
 		txtC.setFont(new Font("Arial", 0, 16));
+		txtC.setForeground(Color.black);
 		//txtC.setBorder(BorderFactory.createLineBorder(Color.black));
-		txtC.setEnabled(false);
+		txtC.setLineWrap(true);
+		txtC.setWrapStyleWord(true);
+		txtC.setEditable(false);
+		//xtC.setEnabled(false);
 		p.add(txtC);
 		
 		rdD = new JRadioButton("D/ ");
@@ -197,37 +365,39 @@ public class TakeAnExamGUI extends JDialog
 		
 		txtD= new JTextArea();
 		txtD.setText(arrCauHoi.get(index).getCauD());
-		txtD.setBounds(rdD.getX() + rdD.getWidth(), rdD.getY(), 230, 60);
+		txtD.setBounds(rdD.getX() + rdD.getWidth(), rdD.getY()+5, 230, 60);
 		txtD.setFont(new Font("Arial", 0, 16));
+		txtD.setForeground(Color.black);
 		//txtD.setBorder(BorderFactory.createLineBorder(Color.black));
-		txtD.setEnabled(false);
+		txtD.setLineWrap(true);
+		txtD.setWrapStyleWord(true);
+		txtD.setEditable(false);
+		//txtD.setEnabled(false);
 		p.add(txtD);
 		
-		lbDapAn = new JLabel();
-		lbDapAn.setText("Đáp án là:");
-		lbDapAn.setBounds(rdA.getX(), txtC.getY() + txtC.getHeight() + 20, 100, 30);
-		lbDapAn.setForeground(BGChinh);
-		lbDapAn.setFont(new Font("Arial", Font.BOLD, 15));
-		p.add(lbDapAn);
-		
-		lbDapAnDung = new JLabel();
-		lbDapAnDung.setBounds(lbDapAn.getX() + lbDapAn.getWidth() + 10, txtC.getY() + txtC.getHeight() + 20, 20, 30);
-		lbDapAnDung.setForeground(BGChinh);
-		lbDapAnDung.setFont(new Font("Arial", Font.BOLD, 15));
-		p.add(lbDapAnDung);
+//		lbDapAn = new JLabel();
+//		lbDapAn.setText("Đáp án là:");
+//		lbDapAn.setBounds(rdA.getX(), txtC.getY() + txtC.getHeight() + 10, 100, 30);
+//		lbDapAn.setForeground(BGChinh);
+//		lbDapAn.setFont(new Font("Arial", Font.BOLD, 15));
+//		p.add(lbDapAn);
+//		
+//		lbDapAnDung = new JLabel();
+//		lbDapAnDung.setBounds(lbDapAn.getX() + lbDapAn.getWidth() + 5,txtC.getY() + txtC.getHeight() + 10 , 450, 30);
+//		lbDapAnDung.setForeground(BGChinh);
+//		lbDapAnDung.setFont(new Font("Arial", Font.BOLD, 15));	
+//		p.add(lbDapAnDung);
 				
 		btn = new JPanel();
 		btn.setBackground(BGChinh);
 		btn.setName("OK");
-		btn.setBounds((p.getWidth() / 2) - 40, lbDapAn.getY() + lbDapAn.getHeight() + 50, 80, 30);
+		btn.setBounds((p.getWidth() / 2) - 40, txtD.getY() + txtD.getHeight() + 10, 80, 30);
 		btn.addMouseListener(MouseButton);
 		JLabel lb = new JLabel("OK");
 		lb.setFont(new Font("Arial", 1, 16));
 		lb.setForeground(Color.white);
 		btn.add(lb);
 		p.add(btn);
-		
-		DemNguocThoiGian(ThoiGian);
 		
 		return p;
 	}
