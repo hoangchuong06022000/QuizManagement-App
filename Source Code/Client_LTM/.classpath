@@ -17,5 +17,6 @@
 	<classpathentry kind="lib" path="lib/swingx-plaf-1.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/testng-6.9.9.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Models"/>
+	<classpathentry kind="lib" path="C:/Users/Netpham1970/Desktop/LTM/QuizManagement-App/Source Code/Client_LTM/lib/javax.mail.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -172,6 +174,33 @@ public class CreateExamGUI extends JFrame
 						JOptionPane.showMessageDialog(null, "Thêm Đề Thi thành công!!");
 						CreateExamGUI parrentFrame = new CreateExamGUI(userName);
 						frame = new JDialog(parrentFrame, true);
+						frame.addWindowListener(new WindowAdapter() {
+				            public void windowClosing(WindowEvent e) {
+				            	int select = JOptionPane.showConfirmDialog(null, "Thao tác này sẽ xoá đề thi bạn vừa tạo!!", "Lựa chọn của bạn", JOptionPane.YES_NO_OPTION);
+				        		if (select == JOptionPane.YES_OPTION) {
+				        			boolean checkDelCauHoi;
+				        			boolean checkDelDeThi;
+				    				try {
+				    					new ConnectServer(socket, out, in).readCauHoiByMaDeThi(CreateExamGUI.maDeThi, "readCauHoi");
+				    					System.out.println(CauHoiBUS.arrCauHoi);
+				    					Thread.sleep(1000);
+				    					ArrayList<Integer> stt = new CauHoiBUS().getSTTByMaDeThi(CreateExamGUI.maDeThi);
+				    					System.out.println(stt);
+				    					for(int i = 0; i < stt.size(); i++) {
+				    						checkDelCauHoi = new ConnectServer(socket, out, in).delCauHoi(stt.get(i), CreateExamGUI.maDeThi, "delCauHoi");
+				    					}
+				    					if(checkDelDeThi = new ConnectServer(socket, out, in).delDeThi(CreateExamGUI.maDeThi, "delDeThi") == true) {
+				    						frame.dispose();
+				    					}
+				    				} catch (IOException ex) {
+				    					ex.printStackTrace();
+				    				} catch (InterruptedException ex) {
+				    					ex.printStackTrace();
+				    				}
+				        		}
+				                dispose();
+				            }
+				        });
 						count = 1;
 						frame.getContentPane().add(JPanelCauHoi(soCauHoi, thoiGianThi, count));
 						frame.pack();

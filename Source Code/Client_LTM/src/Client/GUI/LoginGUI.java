@@ -7,6 +7,7 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeListener;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -14,28 +15,32 @@ import java.io.ObjectOutputStream;
 import java.io.StreamCorruptedException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 import org.jdesktop.swingx.JXDatePicker;
 
-import Client.BUS.ConnectServer;
-import Client.BUS.DeThiBUS;
-import Client.BUS.UserBUS;
-import models.ExecuteED;
+import Client.BUS.*;
+import models.*;
 
 
 public class LoginGUI extends JFrame {
@@ -43,21 +48,28 @@ public class LoginGUI extends JFrame {
     private static int port = 2000;
     public static String current_session = "";
     public static String error_mess = "";
+    public static String otp;
     ConnectServer conn;
     public static Socket socket;
     public static ObjectInputStream in;
     public static ObjectOutputStream out;
     private JPanel contentPane;
     public static JPanel pnDangNhap, pnDangKy, pnForm, pnNorth;
-    public static JLabel lbDangNhap, lbDangKy, lbUser, lbPass, lbXacNhan, lbHoTen, lbGioiTinh, lbNgaySinh;
+    public static JLabel lbDangNhap, lbDangKy, lbUser, lbPass, lbXacNhan, lbHoTen, lbGioiTinh, lbNgaySinh, lbPhut, lbGiay;
     public static JPasswordField txtPass, txtXacNhan;
-    public static JTextField txtUser, txtHoTen;
+    public static JTextField txtUser, txtHoTen, txtOTP;
     public static JXDatePicker txtNgaySinh;
     public static ButtonGroup GroupGioiTinh;
     public static JRadioButton rdNam, rdNu;
-    public static JButton btnDangNhap, btnDangKy;
+    public static JButton btnDangNhap, btnDangKy, btnXacNhan;
     public static Color BGChinh = new Color(45, 59, 85);
     public static Color BGPhu = new Color(232, 233, 236);
+    public int MM, ss;
+	int interval;
+	public Timer timer;
+	public static JDialog frame;
+	public static boolean checkOTP;
+	
     public MouseAdapter MouseEV = new MouseAdapter() {
         public void mouseReleased(MouseEvent e) {
                 // TODO Auto-generated method stub
@@ -81,6 +93,11 @@ public class LoginGUI extends JFrame {
                 lbDangNhap.setForeground(Color.WHITE);
                 pnDangKy.setBackground(BGPhu);
                 lbDangKy.setForeground(Color.GRAY);
+                try {
+					conn = new ConnectServer(socket, "readUser", out, in);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
                 CapNhatNoiDung(src);
             }else {
         		pnDangKy.setBackground(BGChinh);
@@ -138,6 +155,8 @@ public class LoginGUI extends JFrame {
         pnForm.setBackground(Color.white);
         pnForm.add(JPanelDangNhap());
         add(pnForm, BorderLayout.CENTER);
+    }
+    public LoginGUI(String i) {
     }
     public LoginGUI(int i) {
     	init();
@@ -265,6 +284,7 @@ public class LoginGUI extends JFrame {
         rdNam = new JRadioButton();
         rdNam.setText("Nam");
         rdNam.setBackground(Color.white);
+        rdNam.setSelected(true);
         rdNam.setBounds(lbGioiTinh.getX() + lbGioiTinh.getWidth(), lbGioiTinh.getY(), 100, 30);
         rdNu = new JRadioButton();
         rdNu.setText("Nữ");
@@ -410,24 +430,160 @@ public class LoginGUI extends JFrame {
     public void btnDangKyActionPerformed(java.awt.event.ActionEvent evt) {
     	String userName = txtUser.getText();
     	String password = txtPass.getText();
+    	String passwordHashed = new ExecuteED().hashMD5(password);
     	String re_password = txtXacNhan.getText();
     	String hoTen = txtHoTen.getText();
     	SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
     	String ngSinh = String.valueOf(formater.format(txtNgaySinh.getDate()));
-    	int gioiTinh;
-    	if (!rdNam.isSelected()){
+    	int gioiTinh = 0;
+    	if (rdNam.isSelected()){
             gioiTinh = 1;
-        }else {
-        	if (!rdNu.isSelected()){
-        		gioiTinh = 0;
-        	}else {
-        		JOptionPane.showMessageDialog(null, "Bạn chưa chọn giới tính!!");
-        	}
-        }
+    	}
+    	if (rdNu.isSelected()){
+    		gioiTinh = 0;
+    	}
     	if(checkInputDangKy(userName, password, hoTen, re_password)) {
-    		
+    		JOptionPane.showMessageDialog(null, "Đang gửi mã OTP đến email của bạn!!\n Vui lòng chờ đến khi có thông báo!!");
+    		otp = new SendOTP().OTP();
+    		new SendOTP(userName, otp);
+    		JOptionPane.showMessageDialog(null, "Vui lòng nhập mã OTP gửi đến email của bạn!!");
+    		LoginGUI parrent = new LoginGUI("");
+    		frame = new JDialog(parrent, true);
+            frame.setLayout(null);
+    		frame.pack();
+    		frame.setSize(300, 210);
+    		frame.setLocationRelativeTo(null);
+    		frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+    		frame.add(JPanelXacNhanOTP());
+    		frame.setVisible(true);
+    		if(checkOTP == true) {
+    			UserDTO user = new UserDTO(userName, passwordHashed, hoTen, gioiTinh, ngSinh, 1);
+    			boolean checkAddUser;
+    			try {
+					if(checkAddUser = new ConnectServer(socket, out, in).addOrModUser(user, "addUser") == true) {
+						JOptionPane.showMessageDialog(null, "Đăng ký thành công!!");
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+    			
+    		}
     	}else {
     		JOptionPane.showMessageDialog(null, error_mess);
+    	}
+    }
+    
+    public void DemNguocThoiGian(int SoPhut)
+	{
+		 int delay = 1000;
+		 int period = 1000;
+		 timer = new Timer();
+		 MM = SoPhut;
+		 ss = 59;
+		 timer = new Timer();
+		 timer.scheduleAtFixedRate(new TimerTask() {
+			 public void run() {	
+				 setInterval();
+				 
+			 }
+		 }, delay, period);
+	}
+	
+	private final void setInterval() {
+		if(MM < 10)
+			 lbPhut.setText("0" + MM);
+		 else
+			 lbPhut.setText("" + MM);
+		 if(ss < 10)
+			 lbGiay.setText("0" + ss);
+		 else
+			 lbGiay.setText("" + ss);
+		if (MM == 0 && ss <= 0) {
+			timer.cancel();
+			JOptionPane.showMessageDialog(null, "Mã OTP đã hết hạn!!");
+		    frame.dispose();
+		} 
+		 if(ss <= 0)
+		 {
+		    MM--;
+		    ss = 59;
+		    return;
+		 }
+	    --ss;
+	}
+    
+    public JPanel JPanelXacNhanOTP() {
+    	JPanel p = new JPanel();
+    	p.setBackground(Color.WHITE);
+        p.setBounds(0, 0, 300, 210);
+        p.setLayout(null);
+        JLabel lbText = new JLabel();
+        lbText.setText("Nhập mã OTP:");
+        lbText.setBounds(p.getWidth()/2 - 60, 10, 120, 30);
+        lbText.setForeground(BGChinh);
+        lbText.setFont(new Font("Arial", Font.BOLD, 15));
+		p.add(lbText);
+       
+		txtOTP = new JTextField();
+		txtOTP.setBounds(lbText.getX()+12, lbText.getY() + lbText.getHeight() + 10, 80, 30);
+		txtOTP.setFont(new Font("Arial", Font.BOLD, 15));
+		p.add(txtOTP);
+		
+		int ThoiGian = 2;
+		String s_ThoiGian = "";
+		if(ThoiGian < 10)
+			s_ThoiGian = "0" + ThoiGian;
+		else
+			s_ThoiGian = "" + ThoiGian;	
+        
+		lbPhut = new JLabel();
+		lbPhut.setText(s_ThoiGian);
+		lbPhut.setBounds(txtOTP.getX()+12, txtOTP.getY() + txtOTP.getHeight() + 10, 25, 30);
+		lbPhut.setForeground(BGChinh);
+		lbPhut.setFont(new Font("Arial", Font.BOLD, 15));
+		p.add(lbPhut);
+		
+		JLabel lbtem = new JLabel();
+		lbtem.setText(":");
+		lbtem.setBounds(lbPhut.getX() + lbPhut.getWidth(), lbPhut.getY(), 10, 30);
+		lbtem.setForeground(BGChinh);
+		lbtem.setFont(new Font("Arial", Font.BOLD, 15));
+		p.add(lbtem);
+		
+		lbGiay = new JLabel();
+		lbGiay.setText("59");
+		lbGiay.setBounds(lbtem.getX() + lbtem.getWidth(), lbtem.getY(), 30, 30);
+		lbGiay.setForeground(BGChinh);
+		lbGiay.setFont(new Font("Arial", Font.BOLD, 15));
+		p.add(lbGiay);
+		
+		btnXacNhan = new JButton("Xác nhận");
+		btnXacNhan.setBounds(lbText.getX()+2, lbGiay.getY() + lbGiay.getHeight() + 5, 100, 30);
+        btnXacNhan.setBackground(BGChinh);
+        btnXacNhan.setForeground(Color.WHITE);
+        p.add(btnXacNhan);
+        
+        btnXacNhan.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+            	btnXacNhanActionPerformed(evt);
+            }
+        });
+		
+		DemNguocThoiGian(ThoiGian);
+		
+    	return p;
+    }
+    
+    public void btnXacNhanActionPerformed(java.awt.event.ActionEvent evt) {
+    	String input = txtOTP.getText();
+    	if(input.equals(otp)) {
+    		checkOTP = true;
+    		JOptionPane.showMessageDialog(null, "Xác nhận OTP thành công!!");
+    		timer.cancel();
+    		frame.dispose();
+    	}else {
+    		checkOTP = false;
+    		JOptionPane.showMessageDialog(null, "Mã OTP không đúng!!");
     	}
     }
 }

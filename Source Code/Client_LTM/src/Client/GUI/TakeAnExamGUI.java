@@ -88,121 +88,60 @@ public class TakeAnExamGUI extends JDialog
 		init(parrent, arrCauHoi);
 	}
 	
+	public void OK(String dapAn) {		
+		if(count < TakeAnExamGUI.arrCauHoi.size()) {
+			if(TakeAnExamGUI.arrCauHoi.get(count).getDapAn().equals(dapAn)) {	
+				//new ConnectServer(socket, out, in).addOrModDiem(diemUser, "addDiem");
+				soCauDung++;
+				JOptionPane.showMessageDialog(null, "Bạn trả lời đúng!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
+			}else {
+				JOptionPane.showMessageDialog(null, "Bạn trả lời sai!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
+			}
+			count++;
+			if(count == TakeAnExamGUI.arrCauHoi.size()) {
+				diem = (float) 10/TakeAnExamGUI.arrCauHoi.size()*soCauDung;
+				JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + "/" + TakeAnExamGUI.arrCauHoi.size() + "câu\nSố điểm của bạn là: " + diem);
+				timer.cancel();
+				frame.dispose();
+			}else {
+				pnCenter.removeAll();
+				pnCenter.validate();
+				pnCenter.repaint();
+				pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi));
+				pnCenter.validate();
+				pnCenter.repaint();
+			}		
+		}				
+	}
+	
 	public void ChonDapAn(JPanel p) throws InterruptedException {
-		
 		String dapAn = "";
 		if(rdA.isSelected()) {
 			dapAn = txtA.getText();
-			if(p.getName().equals("OK")) {				
-				if(count < TakeAnExamGUI.arrCauHoi.size()) {
-					if(TakeAnExamGUI.arrCauHoi.get(count).getDapAn().equals(dapAn)) {
-						
-						//new ConnectServer(socket, out, in).addOrModDiem(diemUser, "addDiem");
-						soCauDung++;
-						JOptionPane.showMessageDialog(null, "Bạn trả lời đúng!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
-					}else {
-						JOptionPane.showMessageDialog(null, "Bạn trả lời sai!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
-					}
-					count++;
-					if(count == TakeAnExamGUI.arrCauHoi.size()) {
-						diem = (float) 10/TakeAnExamGUI.arrCauHoi.size()*soCauDung;
-						JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + "/" + count + "câu \n Số điểm của bạn là: " + diem);
-						frame.dispose();
-					}else {
-						pnCenter.removeAll();
-						pnCenter.validate();
-						pnCenter.repaint();
-						pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi));
-						pnCenter.validate();
-						pnCenter.repaint();
-					}
-					
-				}	
+			if(p.getName().equals("OK")) {		
+				OK(dapAn);
 			}
 		}
 		else if(rdB.isSelected()){
 			dapAn = txtB.getText();
-
 			if(p.getName().equals("OK")) {
-				if(count < TakeAnExamGUI.arrCauHoi.size()) {
-					if(TakeAnExamGUI.arrCauHoi.get(count).getDapAn().equals(dapAn)) {
-						soCauDung++;
-						JOptionPane.showMessageDialog(null, "Bạn trả lời đúng!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
-					}else {
-						JOptionPane.showMessageDialog(null, "Bạn trả lời sai!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
-					}
-					count++;
-					if(count == TakeAnExamGUI.arrCauHoi.size()) {
-						diem = (float) 10/TakeAnExamGUI.arrCauHoi.size()*soCauDung;
-						JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + "/" + count + "câu \n Số điểm của bạn là: " + diem);
-						frame.dispose();
-					}else {
-						pnCenter.removeAll();
-						pnCenter.validate();
-						pnCenter.repaint();
-						pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi));
-						pnCenter.validate();
-						pnCenter.repaint();
-					}
-				}	
+				OK(dapAn);
 			}
 		}
 		else if(rdC.isSelected()){
 			dapAn = txtC.getText();
-
 			if(p.getName().equals("OK")) {
-				if(count < TakeAnExamGUI.arrCauHoi.size()) {
-					if(TakeAnExamGUI.arrCauHoi.get(count).getDapAn().equals(dapAn)) {
-						soCauDung++;
-						JOptionPane.showMessageDialog(null, "Bạn trả lời đúng!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
-					}else {
-						JOptionPane.showMessageDialog(null, "Bạn trả lời sai!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
-					}
-					count++;
-					if(count == TakeAnExamGUI.arrCauHoi.size()) {
-						diem = (float) 10/TakeAnExamGUI.arrCauHoi.size()*soCauDung;
-						JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + "/" + count + "câu \n Số điểm của bạn là: " + diem);
-						frame.dispose();
-					}else {
-						pnCenter.removeAll();
-						pnCenter.validate();
-						pnCenter.repaint();
-						pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi));
-						pnCenter.validate();
-						pnCenter.repaint();
-					}
-				}	
+				OK(dapAn);
 			}
 		}
 		else if(rdD.isSelected()){
 			dapAn = txtD.getText();
-
 			if(p.getName().equals("OK")) {
-				if(count < TakeAnExamGUI.arrCauHoi.size()) {
-					if(TakeAnExamGUI.arrCauHoi.get(count).getDapAn().equals(dapAn)) {
-						soCauDung++;
-						JOptionPane.showMessageDialog(null, "Bạn trả lời đúng!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
-					}else {
-						JOptionPane.showMessageDialog(null, "Bạn trả lời sai!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
-					}
-					count++;
-					if(count == TakeAnExamGUI.arrCauHoi.size()) {
-						diem = (float) 10/TakeAnExamGUI.arrCauHoi.size()*soCauDung;
-						JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + "/" + count + "câu \n Số điểm của bạn là: " + diem);
-						frame.dispose();
-					}else {
-						pnCenter.removeAll();
-						pnCenter.validate();
-						pnCenter.repaint();
-						pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi));
-						pnCenter.validate();
-						pnCenter.repaint();
-					}
-				}	
+				OK(dapAn);
 			}
 		}else {
 			JOptionPane.showMessageDialog(null, "Bạn chưa chọn đáp án!!");
-		}
+		}	
 	}
 	
 	public void init(JFrame parrent, ArrayList<CauHoiDTO> arrCauHoi)
@@ -216,7 +155,7 @@ public class TakeAnExamGUI extends JDialog
         pnCenter = new JPanel();
         pnCenter.setBounds(0, 0, 650, 460);
         pnCenter.setLayout(null);
-        pnCenter.add(JPanelTakeAnExam(arrCauHoi));
+        pnCenter.add(JPanelTakeAnExam(arrCauHoi));		
         frame = new JDialog(parrent, true);
         frame.setLayout(new BorderLayout(1,2));
 		frame.pack();
@@ -230,6 +169,7 @@ public class TakeAnExamGUI extends JDialog
 	
 	public JPanel JPanelThoiGianThi(ArrayList<CauHoiDTO> arrCauHoi) {
 		int ThoiGian = new DeThiBUS().getThoiGianThi(arrCauHoi.get(count).getMaDeThi()) - 1;
+		//int ThoiGian = 0;
 		String s_ThoiGian = "";
 		if(ThoiGian < 10)
 			s_ThoiGian = "0" + ThoiGian;
@@ -254,7 +194,7 @@ public class TakeAnExamGUI extends JDialog
 		p.add(lbtem);
 		
 		lbGiay = new JLabel();
-		lbGiay.setText("00");
+		lbGiay.setText("59");
 		lbGiay.setBounds(lbtem.getX() + lbtem.getWidth(), lbtem.getY(), 30, 30);
 		lbGiay.setForeground(BGChinh);
 		lbGiay.setFont(new Font("Arial", Font.BOLD, 20));
@@ -288,7 +228,7 @@ public class TakeAnExamGUI extends JDialog
 		
 		txtCauHoi= new JTextArea();
 		txtCauHoi.setText(arrCauHoi.get(count).getTenCauHoi());
-		txtCauHoi.setBounds(lbSoCau.getX(), lbSoCau.getY() + lbSoCau.getHeight() + 10, 600, 120);
+		txtCauHoi.setBounds(lbSoCau.getX(), lbSoCau.getY() + lbSoCau.getHeight() + 20, 600, 120);
 		txtCauHoi.setFont(new Font("Arial", Font.ITALIC, 16));
 		txtCauHoi.setForeground(Color.black);
 		txtCauHoi.setEditable(false);
@@ -319,7 +259,7 @@ public class TakeAnExamGUI extends JDialog
 		p.add(txtA);
 		
 		rdB = new JRadioButton("B/ ");
-		rdB.setBounds(txtA.getX() + txtA.getWidth() + 28, txtA.getY(), 50, 30);
+		rdB.setBounds(txtA.getX() + txtA.getWidth() + 28, txtA.getY() - 5, 50, 30);
 		rdB.setFont(new Font("Arial", 0, 16));
 		rdB.setBackground(Color.WHITE);
 		groupDapAn.add(rdB);
@@ -357,7 +297,7 @@ public class TakeAnExamGUI extends JDialog
 		p.add(txtC);
 		
 		rdD = new JRadioButton("D/ ");
-		rdD.setBounds(txtC.getX() + txtC.getWidth() + 28, txtC.getY(), 50, 30);
+		rdD.setBounds(txtC.getX() + txtC.getWidth() + 28, txtC.getY() - 5, 50, 30);
 		rdD.setFont(new Font("Arial", 0, 16));
 		rdD.setBackground(Color.WHITE);
 		groupDapAn.add(rdD);
@@ -427,8 +367,12 @@ public class TakeAnExamGUI extends JDialog
 			 lbGiay.setText("0" + ss);
 		 else
 			 lbGiay.setText("" + ss);
-		if (MM == 0 && ss <= 0)
-	        timer.cancel();
+		if (MM == 0 && ss <= 0) {
+			timer.cancel();
+			diem = (float) 10/TakeAnExamGUI.arrCauHoi.size()*soCauDung;
+			JOptionPane.showMessageDialog(null, "Bạn đã hết thời gian thi!!\nSố câu đúng " + soCauDung + "/" + TakeAnExamGUI.arrCauHoi.size() + "câu\nSố điểm của bạn là: " + diem);
+			frame.dispose();
+		} 
 		 if(ss <= 0)
 		 {
 		    MM--;

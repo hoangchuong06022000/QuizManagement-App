@@ -3,6 +3,7 @@ encoding//src/Client/BUS/CauHoiBUS.java=UTF-8
 encoding//src/Client/BUS/ConnectServer.java=UTF-8
 encoding//src/Client/BUS/DeThiBUS.java=UTF-8
 encoding//src/Client/BUS/DiemBUS.java=UTF-8
+encoding//src/Client/BUS/SendOTP.java=UTF-8
 encoding//src/Client/BUS/UserBUS.java=UTF-8
 encoding//src/Client/GUI/CreateExamGUI.java=UTF-8
 encoding//src/Client/GUI/LoginGUI.java=UTF-8

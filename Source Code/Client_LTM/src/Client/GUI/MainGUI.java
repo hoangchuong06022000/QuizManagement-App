@@ -43,6 +43,7 @@ public class MainGUI extends JFrame
     public static ObjectOutputStream out;
     ConnectServer conn;
 	public JPanel pLeft, pCenter, pBoDeThi;
+	public static JPanel pDown;
 	private JPanel[] pnDanhMuc, pnPhanTrang; 
     private JLabel[] lbDanhMuc;
 	private String[] DanhMuc = {"Tham gia thi", "Tạo đề thi", "Thông tin tài khoản", "Đăng xuất"};
@@ -50,7 +51,8 @@ public class MainGUI extends JFrame
 	public Color BGPhu = new Color(232, 233, 236);
 	public Color BGCam = new Color(255, 165, 0);
 	public String LuaChon, TrangHienTai;
-	public int SoTrang = 0, SoDeToiDa = 6;
+	public int SoDeToiDa = 6;
+	public static int SoTrang = 0;
 		
 	public MouseAdapter MouseEV = new MouseAdapter() 
     {
@@ -90,14 +92,14 @@ public class MainGUI extends JFrame
 						SetBGDanhMuc();
 						pnDanhMuc[0].setBackground(BGCam);
 	        			LuaChon = src.getName().toString();
-	                    XoaPhanNoiDung(src);
-	                    Thread.sleep(1000);
+	                    XoaPhanNoiDung(src); 
+	                    Thread.sleep(500);
 						break;
 					} catch (IOException e) {	
 						e.printStackTrace();
 					} catch (InterruptedException e) {
 						e.printStackTrace();
-					}	
+					}
 				}
 				case "Tạo đề thi":{
 					SetBGDanhMuc();
@@ -182,7 +184,6 @@ public class MainGUI extends JFrame
 	
 	public void LoadBoDeThi()
 	{
-		
 		SoTrang = (DeThiBUS.arrDeThi.size()) / SoDeToiDa;
 		if(DeThiBUS.arrDeThi.size() % SoDeToiDa != 0)
 		{
@@ -204,7 +205,6 @@ public class MainGUI extends JFrame
         pLeft.setBackground(BGChinh);
         pLeft.setPreferredSize(new Dimension(250, 0));
         
-        LoadBoDeThi();
         pCenter = JPanelThamGiaThi();
         pCenter.setBackground(Color.white);
         pCenter.setPreferredSize(new Dimension(0, 0));
@@ -252,7 +252,7 @@ public class MainGUI extends JFrame
     	pBoDeThi.setPreferredSize(new Dimension(0, 0));
     	pBoDeThi.setBackground(Color.white);
     	
-    	JPanel pDown = new JPanel();
+    	pDown = new JPanel();
     	pDown.setPreferredSize(new Dimension(0, 50));
     	pDown.setBackground(Color.white);
     	
@@ -346,7 +346,7 @@ public class MainGUI extends JFrame
 		});
     	btnThi.setName(De.getMaDeThi());
     	pDown.add(btnThi);
-    	if(De.getSoLuotThi() == 0)
+    	if((De.getSoLuotThi() == 0) && (De.getUserName().equals(userName)))
     	{
     		JButton btnSua = new JButton("Sửa");
     		btnSua.setName(De.getMaDeThi());
