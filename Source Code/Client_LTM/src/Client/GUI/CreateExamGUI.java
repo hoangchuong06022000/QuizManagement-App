@@ -38,7 +38,7 @@ public class CreateExamGUI extends JFrame
 	public static String current_session = "";
 	public static String userName = "";
 	public static String maDeThi = "";
-	public static int count = 1;
+	public int count;
 	public static Socket socket;
 	public static ObjectInputStream in;
     public static ObjectOutputStream out;
@@ -172,7 +172,8 @@ public class CreateExamGUI extends JFrame
 						JOptionPane.showMessageDialog(null, "Thêm Đề Thi thành công!!");
 						CreateExamGUI parrentFrame = new CreateExamGUI(userName);
 						frame = new JDialog(parrentFrame, true);
-						frame.getContentPane().add(JPanelCauHoi(soCauHoi, thoiGianThi, 1));
+						count = 1;
+						frame.getContentPane().add(JPanelCauHoi(soCauHoi, thoiGianThi, count));
 						frame.pack();
 						frame.setSize(650, 500);
 						frame.setLocationRelativeTo(null);

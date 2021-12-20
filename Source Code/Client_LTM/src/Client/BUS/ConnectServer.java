@@ -259,7 +259,6 @@ public class ConnectServer {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}    
-    	System.out.println("addDeThi2 = "+ ConnectServer.check);
         return ConnectServer.check;
     }
     

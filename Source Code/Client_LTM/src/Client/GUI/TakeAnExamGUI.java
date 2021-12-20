@@ -43,9 +43,9 @@ public class TakeAnExamGUI extends JDialog
 	public ButtonGroup groupDapAn;
 	public JRadioButton rdA, rdB, rdC, rdD;
 	public JLabel lbCauHoi, lbPhut, lbGiay, lbDapAn, lbDapAnDung;
-	public static int MM, ss;
+	public int MM, ss;
 	int interval;
-	public static int soCauDung, count = 0;
+	public int soCauDung, count;
 	public static float diem = 0;
 	public Timer timer;
 	
@@ -91,7 +91,6 @@ public class TakeAnExamGUI extends JDialog
 	public void ChonDapAn(JPanel p) throws InterruptedException {
 		
 		String dapAn = "";
-		System.out.println("chua select: " + dapAn);
 		if(rdA.isSelected()) {
 			dapAn = txtA.getText();
 			if(p.getName().equals("OK")) {				
@@ -105,15 +104,15 @@ public class TakeAnExamGUI extends JDialog
 						JOptionPane.showMessageDialog(null, "Bạn trả lời sai!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
 					}
 					count++;
-					if(count == TakeAnExamGUI.arrCauHoi.size() - 1) {
+					if(count == TakeAnExamGUI.arrCauHoi.size()) {
 						diem = (float) 10/TakeAnExamGUI.arrCauHoi.size()*soCauDung;
-						JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + " câu \n Số điểm của bạn là: " + diem);
+						JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + "/" + count + "câu \n Số điểm của bạn là: " + diem);
 						frame.dispose();
 					}else {
 						pnCenter.removeAll();
 						pnCenter.validate();
 						pnCenter.repaint();
-						pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi, count));
+						pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi));
 						pnCenter.validate();
 						pnCenter.repaint();
 					}
@@ -133,15 +132,15 @@ public class TakeAnExamGUI extends JDialog
 						JOptionPane.showMessageDialog(null, "Bạn trả lời sai!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
 					}
 					count++;
-					if(count == TakeAnExamGUI.arrCauHoi.size() - 1) {
+					if(count == TakeAnExamGUI.arrCauHoi.size()) {
 						diem = (float) 10/TakeAnExamGUI.arrCauHoi.size()*soCauDung;
-						JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + " câu \n Số điểm của bạn là: " + diem);
+						JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + "/" + count + "câu \n Số điểm của bạn là: " + diem);
 						frame.dispose();
 					}else {
 						pnCenter.removeAll();
 						pnCenter.validate();
 						pnCenter.repaint();
-						pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi, count));
+						pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi));
 						pnCenter.validate();
 						pnCenter.repaint();
 					}
@@ -160,15 +159,15 @@ public class TakeAnExamGUI extends JDialog
 						JOptionPane.showMessageDialog(null, "Bạn trả lời sai!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
 					}
 					count++;
-					if(count == TakeAnExamGUI.arrCauHoi.size() - 1) {
+					if(count == TakeAnExamGUI.arrCauHoi.size()) {
 						diem = (float) 10/TakeAnExamGUI.arrCauHoi.size()*soCauDung;
-						JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + " câu \n Số điểm của bạn là: " + diem);
+						JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + "/" + count + "câu \n Số điểm của bạn là: " + diem);
 						frame.dispose();
 					}else {
 						pnCenter.removeAll();
 						pnCenter.validate();
 						pnCenter.repaint();
-						pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi, count));
+						pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi));
 						pnCenter.validate();
 						pnCenter.repaint();
 					}
@@ -187,15 +186,15 @@ public class TakeAnExamGUI extends JDialog
 						JOptionPane.showMessageDialog(null, "Bạn trả lời sai!! Đáp án là:\n" + TakeAnExamGUI.arrCauHoi.get(count).getDapAn());
 					}
 					count++;
-					if(count == TakeAnExamGUI.arrCauHoi.size() - 1) {
+					if(count == TakeAnExamGUI.arrCauHoi.size()) {
 						diem = (float) 10/TakeAnExamGUI.arrCauHoi.size()*soCauDung;
-						JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + " câu \n Số điểm của bạn là: " + diem);
+						JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + "/" + count + "câu \n Số điểm của bạn là: " + diem);
 						frame.dispose();
 					}else {
 						pnCenter.removeAll();
 						pnCenter.validate();
 						pnCenter.repaint();
-						pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi, count));
+						pnCenter.add(JPanelTakeAnExam(TakeAnExamGUI.arrCauHoi));
 						pnCenter.validate();
 						pnCenter.repaint();
 					}
@@ -208,15 +207,16 @@ public class TakeAnExamGUI extends JDialog
 	
 	public void init(JFrame parrent, ArrayList<CauHoiDTO> arrCauHoi)
     { 
+		count = 0; soCauDung = 0;
         setSize(650, 500);
         setLocationRelativeTo(null);
 		setTitle("Thực hiện thi");
-        pnNorth = JPanelThoiGianThi(arrCauHoi, 0);
+        pnNorth = JPanelThoiGianThi(arrCauHoi);
         pnNorth.setPreferredSize(new Dimension(650, 40));
         pnCenter = new JPanel();
         pnCenter.setBounds(0, 0, 650, 460);
         pnCenter.setLayout(null);
-        pnCenter.add(JPanelTakeAnExam(arrCauHoi, 0));
+        pnCenter.add(JPanelTakeAnExam(arrCauHoi));
         frame = new JDialog(parrent, true);
         frame.setLayout(new BorderLayout(1,2));
 		frame.pack();
@@ -228,8 +228,8 @@ public class TakeAnExamGUI extends JDialog
 		frame.setVisible(true);
     }
 	
-	public JPanel JPanelThoiGianThi(ArrayList<CauHoiDTO> arrCauHoi, int index) {
-		int ThoiGian = new DeThiBUS().getThoiGianThi(arrCauHoi.get(index).getMaDeThi()) - 1;
+	public JPanel JPanelThoiGianThi(ArrayList<CauHoiDTO> arrCauHoi) {
+		int ThoiGian = new DeThiBUS().getThoiGianThi(arrCauHoi.get(count).getMaDeThi()) - 1;
 		String s_ThoiGian = "";
 		if(ThoiGian < 10)
 			s_ThoiGian = "0" + ThoiGian;
@@ -265,7 +265,7 @@ public class TakeAnExamGUI extends JDialog
         return p;
 	}
 	
-	public JPanel JPanelTakeAnExam(ArrayList<CauHoiDTO> arrCauHoi, int index) {
+	public JPanel JPanelTakeAnExam(ArrayList<CauHoiDTO> arrCauHoi) {
 
 		JPanel p = new JPanel();
 		p.setLayout(new BorderLayout(2,1));
@@ -281,13 +281,13 @@ public class TakeAnExamGUI extends JDialog
 		p.add(lbSoCau);
 		
 		lbCauHoi = new JLabel();
-		lbCauHoi.setText(String.valueOf(arrCauHoi.get(index).getStt()));
+		lbCauHoi.setText(String.valueOf(arrCauHoi.get(count).getStt()));
 		lbCauHoi.setBounds(lbSoCau.getX() + lbSoCau.getWidth(), lbSoCau.getY(), 50, 30);
 		lbCauHoi.setFont(new Font("Arial", Font.BOLD, 16));
 		p.add(lbCauHoi);
 		
 		txtCauHoi= new JTextArea();
-		txtCauHoi.setText(arrCauHoi.get(index).getTenCauHoi());
+		txtCauHoi.setText(arrCauHoi.get(count).getTenCauHoi());
 		txtCauHoi.setBounds(lbSoCau.getX(), lbSoCau.getY() + lbSoCau.getHeight() + 10, 600, 120);
 		txtCauHoi.setFont(new Font("Arial", Font.ITALIC, 16));
 		txtCauHoi.setForeground(Color.black);
@@ -307,7 +307,7 @@ public class TakeAnExamGUI extends JDialog
 		p.add(rdA);
 		
 		txtA= new JTextArea();
-		txtA.setText(arrCauHoi.get(index).getCauA());
+		txtA.setText(arrCauHoi.get(count).getCauA());
 		txtA.setBounds(rdA.getX() + rdA.getWidth(), rdA.getY()+5, 230, 60);
 		txtA.setFont(new Font("Arial", 0, 16));
 		txtA.setForeground(Color.black);
@@ -326,7 +326,7 @@ public class TakeAnExamGUI extends JDialog
 		p.add(rdB);
 		
 		txtB= new JTextArea();
-		txtB.setText(arrCauHoi.get(index).getCauB());
+		txtB.setText(arrCauHoi.get(count).getCauB());
 		txtB.setBounds(rdB.getX() + rdB.getWidth(), rdB.getY()+5, 230, 60);
 		txtB.setFont(new Font("Arial", 0, 16));
 		txtB.setForeground(Color.black);
@@ -345,7 +345,7 @@ public class TakeAnExamGUI extends JDialog
 		p.add(rdC);
 		
 		txtC= new JTextArea();
-		txtC.setText(arrCauHoi.get(index).getCauC());
+		txtC.setText(arrCauHoi.get(count).getCauC());
 		txtC.setBounds(rdC.getX() + rdC.getWidth(), rdC.getY()+5, 230, 60);
 		txtC.setFont(new Font("Arial", 0, 16));
 		txtC.setForeground(Color.black);
@@ -364,7 +364,7 @@ public class TakeAnExamGUI extends JDialog
 		p.add(rdD);
 		
 		txtD= new JTextArea();
-		txtD.setText(arrCauHoi.get(index).getCauD());
+		txtD.setText(arrCauHoi.get(count).getCauD());
 		txtD.setBounds(rdD.getX() + rdD.getWidth(), rdD.getY()+5, 230, 60);
 		txtD.setFont(new Font("Arial", 0, 16));
 		txtD.setForeground(Color.black);
