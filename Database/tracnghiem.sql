@@ -43,7 +43,7 @@ CREATE TABLE `cauhoi` (
 --
 
 INSERT INTO `cauhoi` (`STT`, `maDeThi`, `tenCauHoi`, `cauA`, `cauB`, `cauC`, `cauD`, `dapAn`) VALUES
-(1, 'DE0001', 'Rễ cây trên cạn hấp thụ nước và ion muối khoáng chủ yếu qua', 'miền lông hút', 'miền chóp rễ.', 'miền sinh trưởng.', 'miền trưởng thành.', 'miền lông hút.'),
+(1, 'DE0001', 'Rễ cây trên cạn hấp thụ nước và ion muối khoáng chủ yếu qua', 'miền lông hút', 'miền chóp rễ.', 'miền sinh trưởng.', 'miền trưởng thành.', 'miền lông hút'),
 (1, 'DE0002', 'Nguyên nhân chủ yếu tạo nên sự tương phản về trình độ phát triển kinh tế - xã hội giữa nhóm nước phát triển với đang phát triển là', 'Thành phần chủng tộc và tôn giáo.', 'Quy mô dân số và cơ cấu dân số.', 'Trình độ khoa học – kĩ thuật.', 'Điều kiện tự nhiên và tài nguyên thiên nhiên.', 'Trình độ khoa học – kĩ thuật.'),
 (1, 'DE0003', 'Có mấy khổ giấy chính?', '2', '3', '4', '5', '5'),
 (1, 'DE0004', 'Thiết kế nhằm mục đích gì?', 'Xác định hình dạng', 'Xác định kích thước', 'Xác định kết cấu và chức năng', 'Cả 3 đáp án trên', 'Cả 3 đáp án trên'),
