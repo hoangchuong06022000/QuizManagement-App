@@ -39,7 +39,29 @@ public class DeThiDAO {
         
         return arrDeThi;
     }
-    
+    public int TongSoDeThi(){
+        db = new DBConnection();
+        String SoLuong = "";
+        ArrayList<DeThiDTO> arrDeThi = new ArrayList<>();
+        
+        try{
+            String query = "SELECT COUNT(maDeThi) as SoLuong FROM DeThi";
+            ResultSet rs = db.SQLQuery(query);
+            if (rs != null){
+                while (rs.next()){
+                    SoLuong = rs.getString("SoLuong");
+                }
+            }
+        }
+        catch (SQLException ex){
+        	JOptionPane.showMessageDialog(null, "Lỗi!!! Lỗi đọc dữ liệu bảng DeThi");
+        } 
+        finally{
+            db.closeConnection();
+        }
+        
+        return Integer.parseInt(SoLuong);
+    }
     public Boolean add(DeThiDTO deThi){
         db = new DBConnection();
         Boolean check = db.SQLUpdate("INSERT INTO DeThi(maDeThi, tenDeThi, soCauHoi, thoiGianThi, soLuotThi, userName) "

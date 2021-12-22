@@ -20,10 +20,12 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SealedObject;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class ExecuteED {
     public static ArrayList<?> list = new ArrayList<>();
-
+    public static SecretKey key;
+    
     public ExecuteED() {
     }
     
@@ -80,62 +82,79 @@ public class ExecuteED {
         return hashedPassword;
     }
     
-    public SecretKey generateKey(int n) throws NoSuchAlgorithmException {
-        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+    public SecretKey generateSecretKey(int n) throws NoSuchAlgorithmException {
+    	KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
         keyGenerator.init(n);
         SecretKey key = keyGenerator.generateKey();
         return key;
     }
     
-    public IvParameterSpec generateIv() {
+    public static IvParameterSpec generateIv() {
         byte[] iv = new byte[16];
         new SecureRandom().nextBytes(iv);
         return new IvParameterSpec(iv);
     }
     
-    public String encrypt(String algorithm, String input, SecretKey key,
-        IvParameterSpec iv) throws NoSuchPaddingException, NoSuchAlgorithmException,
+    public String encryptAES(String algorithm, String input, SecretKey key) throws NoSuchPaddingException, NoSuchAlgorithmException,
         InvalidAlgorithmParameterException, InvalidKeyException,
         BadPaddingException, IllegalBlockSizeException {
 
         Cipher cipher = Cipher.getInstance(algorithm);
-        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
         byte[] cipherText = cipher.doFinal(input.getBytes());
         return Base64.getEncoder().encodeToString(cipherText);
     }
     
-    public String decrypt(String algorithm, String cipherText, SecretKey key,
-        IvParameterSpec iv) throws NoSuchPaddingException, NoSuchAlgorithmException,
+    public String decryptAES(String algorithm, String cipherText, SecretKey key) throws NoSuchPaddingException, NoSuchAlgorithmException,
         InvalidAlgorithmParameterException, InvalidKeyException,
         BadPaddingException, IllegalBlockSizeException {
 
         Cipher cipher = Cipher.getInstance(algorithm);
-        cipher.init(Cipher.DECRYPT_MODE, key, iv);
+        cipher.init(Cipher.DECRYPT_MODE, key);
         byte[] plainText = cipher.doFinal(Base64.getDecoder()
             .decode(cipherText));
         return new String(plainText);
     }
     
-    public SealedObject encryptObject(String algorithm, Serializable object,
-        SecretKey key, IvParameterSpec iv) throws NoSuchPaddingException,
+    public SealedObject encryptObjectAES(String algorithm, Serializable object,
+        SecretKey key) throws NoSuchPaddingException,
         NoSuchAlgorithmException, InvalidAlgorithmParameterException, 
         InvalidKeyException, IOException, IllegalBlockSizeException {
 
         Cipher cipher = Cipher.getInstance(algorithm);
-        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
         SealedObject sealedObject = new SealedObject(object, cipher);
         return sealedObject;
     }
     
-    public Serializable decryptObject(String algorithm, SealedObject sealedObject,
-        SecretKey key, IvParameterSpec iv) throws NoSuchPaddingException,
+    public Serializable decryptObjectAES(String algorithm, SealedObject sealedObject,
+        SecretKey key) throws NoSuchPaddingException,
         NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException,
         ClassNotFoundException, BadPaddingException, IllegalBlockSizeException,
         IOException {
 
         Cipher cipher = Cipher.getInstance(algorithm);
-        cipher.init(Cipher.DECRYPT_MODE, key, iv);
+        cipher.init(Cipher.DECRYPT_MODE, key);
         Serializable unsealObject = (Serializable) sealedObject.getObject(cipher);
         return unsealObject;
     }
+    
+    public SecretKey convertStringToSecretKey(String encodedKey) {
+        byte[] decodedKey = Base64.getDecoder().decode(encodedKey);
+        SecretKey originalKey = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
+        return originalKey;
+    }
+    
+    public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, InvalidAlgorithmParameterException, BadPaddingException, IllegalBlockSizeException, IOException, ClassNotFoundException {
+    	DiemDTO diem = new DiemDTO(10, 20);
+        SecretKey key = new ExecuteED().generateSecretKey(128);
+        String algorithm = "AES/ECB/PKCS5Padding";
+        SealedObject sealedObject = new ExecuteED().encryptObjectAES(
+          algorithm, diem, key);
+        DiemDTO object = (DiemDTO) new ExecuteED().decryptObjectAES(
+          algorithm, sealedObject, key);
+        System.out.println(sealedObject);
+        System.out.println(object.diem);
+        
+	}
 }

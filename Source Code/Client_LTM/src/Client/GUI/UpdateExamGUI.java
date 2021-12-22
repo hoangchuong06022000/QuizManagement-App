@@ -36,8 +36,9 @@ import models.ExecuteED;
 import models.UserDTO;
 import Client.BUS.*;
 
-public class CreateExamGUI extends JFrame
+public class UpdateExamGUI extends JFrame
 {
+	public static DeThiDTO DeThi;
 	public static String current_session = "";
 	public static String userName = "";
 	public static String maDeThi = "";
@@ -47,7 +48,7 @@ public class CreateExamGUI extends JFrame
     public static ObjectOutputStream out;
     ConnectServer conn;
 	public static String error_mess = "";
-	public JPanel btn, btnCancel, btnContinue;
+	public JPanel btn, btnDelete, btnContinue;
 	public Color BGChinh = new Color(45, 59, 85);
 	public Color BGPhu = new Color(232, 233, 236);
 	public Color BGCam = new Color(255, 165, 0);
@@ -81,7 +82,7 @@ public class CreateExamGUI extends JFrame
            	CreateCauHoi(src); 	
         }
     };
-    public MouseAdapter MouseBtnCancel = new MouseAdapter() 
+    public MouseAdapter MouseBtnDelete = new MouseAdapter() 
     {
         public void mouseEntered(MouseEvent me) 
         {
@@ -129,15 +130,15 @@ public class CreateExamGUI extends JFrame
         }
     };
 	
-    public CreateExamGUI(String userName) {
-    	CreateExamGUI.userName = userName;
+    public UpdateExamGUI(String userName) {
+    	UpdateExamGUI.userName = userName;
     }
     
-	public CreateExamGUI(Socket socket, ObjectOutputStream out, ObjectInputStream in)
+	public UpdateExamGUI(Socket socket, ObjectOutputStream out, ObjectInputStream in)
     {
-		CreateExamGUI.socket = socket;
-		CreateExamGUI.out = out;
-		CreateExamGUI.in = in;
+		UpdateExamGUI.socket = socket;
+		UpdateExamGUI.out = out;
+		UpdateExamGUI.in = in;
         init();
     }
 	
@@ -147,6 +148,19 @@ public class CreateExamGUI extends JFrame
         JPanel p = new JPanel();
         p = JPanelChung();
         add(p);
+        
+        for(DeThiDTO De : DeThiBUS.arrDeThi)
+        {
+        	if(De.getMaDeThi().equals(maDeThi))
+        	{
+        		DeThi = De;
+        	}
+        	
+        }
+        
+        txtTenDeThi.setText(DeThi.getTenDeThi());
+        comboSoCau.setSelectedItem(DeThi.getSoCauHoi());
+        comboThoiGian.setSelectedItem(DeThi.getThoiGianThi());
     }
 	
 	public JPanel JPanelChung() {
@@ -162,7 +176,7 @@ public class CreateExamGUI extends JFrame
    		int soCauHoi = Integer.parseInt((String) comboSoCau.getSelectedItem());
 		int thoiGianThi = Integer.parseInt((String) comboThoiGian.getSelectedItem());
 		if(p.getName().equals("Continue")) {
-			String maDeThi = new ExecuteED().next_maDeThi(new DeThiBUS().getPKey());
+			String maDeThi = DeThi.getMaDeThi();
 			CreateExamGUI.maDeThi = maDeThi;
 			if(txtTenDeThi.getText().equals("")) {
 				JOptionPane.showMessageDialog(null, "Tên đề thi trống!!");
@@ -182,36 +196,10 @@ public class CreateExamGUI extends JFrame
 					try {
 						boolean check;
 						if(check = new ConnectServer(socket, out, in).addOrModDeThi(deThi, "addDeThi") == true) {
-							JOptionPane.showMessageDialog(null, "Thêm Đề Thi thành công!!");
+							JOptionPane.showMessageDialog(null, "Sửa Đề Thi thành công!!");
 							CreateExamGUI parrentFrame = new CreateExamGUI(userName);
 							frame = new JDialog(parrentFrame, true);
 							frame.setUndecorated(true);
-							frame.addWindowListener(new WindowAdapter() {
-					            public void windowClosing(WindowEvent e) {
-					            	int select = JOptionPane.showConfirmDialog(null, "Thao tác này sẽ xoá đề thi bạn vừa tạo!!", "Lựa chọn của bạn", JOptionPane.YES_NO_OPTION);
-					        		if (select == JOptionPane.YES_OPTION) {
-					        			boolean checkDelCauHoi;
-					        			boolean checkDelDeThi;
-					    				try {
-					    					new ConnectServer(socket, out, in).readCauHoiByMaDeThi(CreateExamGUI.maDeThi, "readCauHoi");
-					    					System.out.println(CauHoiBUS.arrCauHoi);
-					    					Thread.sleep(1000);
-					    					ArrayList<Integer> stt = new CauHoiBUS().getSTTByMaDeThi(CreateExamGUI.maDeThi);
-					    					System.out.println(stt);
-					    					for(int i = 0; i < stt.size(); i++) {
-					    						checkDelCauHoi = new ConnectServer(socket, out, in).delCauHoi(stt.get(i), CreateExamGUI.maDeThi, "delCauHoi");
-					    					}
-					    					if(checkDelDeThi = new ConnectServer(socket, out, in).delDeThi(CreateExamGUI.maDeThi, "delDeThi") == true) {
-					    						frame.dispose();
-					    					}
-					    				} catch (IOException ex) {
-					    					ex.printStackTrace();
-					    				} catch (InterruptedException ex) {
-					    					ex.printStackTrace();
-					    				}
-					        		}
-					            }
-					        });
 							count = 1;
 							frame.getContentPane().add(JPanelCauHoi(soCauHoi, thoiGianThi, count));
 							frame.pack();
@@ -236,7 +224,7 @@ public class CreateExamGUI extends JFrame
     	}	 		
 	}
 	public void XoaDeThi(JPanel p) {
-		if(p.getName().equals("Cancel")) {
+		if(p.getName().equals("Delete")) {
 			int select = JOptionPane.showConfirmDialog(null, "Thao tác này sẽ xoá đề thi bạn vừa tạo!!", "Lựa chọn của bạn", JOptionPane.YES_NO_OPTION);
     		if (select == JOptionPane.YES_OPTION) {
     			boolean checkDelCauHoi;
@@ -264,25 +252,22 @@ public class CreateExamGUI extends JFrame
 	
 	public void SaveCauHoi(JPanel p, int soCauHoi, int thoiGianThi) {
 		String tenCauHoi = txtCauHoi.getText();
-		for(CauHoiDTO Cauhoi : CauHoiBUS.arrCauHoi){
-			if(Cauhoi.getTenCauHoi().equals(tenCauHoi)){
-				JOptionPane.showMessageDialog(null, "Câu hỏi này đã tồn tại !!!");
-				return;
-			}
-		}
+		
 		String cauA = txtA.getText();
 		String cauB = txtB.getText();
 		String cauC = txtC.getText();
 		String cauD = txtD.getText();
 		String dapAn = txtDapAn.getText();
 		
+		
 		if(p.getName().equals("OK")) {
 			if(count == soCauHoi) {
-				JOptionPane.showMessageDialog(null, "Tạo Câu Hỏi cho đề thi thành công!!");
+				JOptionPane.showMessageDialog(null, "Sửa Câu Hỏi cho đề thi thành công!!");
 				frame.dispose();
 			}
-			if(checkDapAn(tenCauHoi, cauA, cauB, cauC, cauD, dapAn)) {		
-				if(cauA.equals(cauB) || cauA.equals(cauC) || cauA.equals(cauD) || cauB.equals(cauC) || cauB.equals(cauD) || cauC.equals(cauD) ){
+			if(checkDapAn(tenCauHoi, cauA, cauB, cauC, cauD, dapAn)) {	
+				if(cauA.equals(cauB) || cauA.equals(cauC) || cauA.equals(cauD) || cauB.equals(cauC) || cauB.equals(cauD) || cauC.equals(cauD) )
+				{
 					JOptionPane.showMessageDialog(null, "Đáp án của bạn không được trùng !!!");
 					return;
 				}
@@ -290,41 +275,15 @@ public class CreateExamGUI extends JFrame
 					CauHoiDTO cauHoi = new CauHoiDTO(count, CreateExamGUI.maDeThi, tenCauHoi, cauA, cauB, cauC, cauD, dapAn);
 					System.out.println(cauHoi.getMaDeThi());
 					boolean check;
-					if(check = new ConnectServer(socket, out, in).addOrModCauHoi(cauHoi, "addCauHoi") == true) {
+					if(check = new ConnectServer(socket, out, in).addOrModCauHoi(cauHoi, "modCauHoi") == true) {
 						if(count < soCauHoi) {
-							JOptionPane.showMessageDialog(null, "Thêm thành công!!");
+							JOptionPane.showMessageDialog(null, "Sửa thành công!!");
 							CauHoiBUS.arrCauHoi.add(cauHoi);
 							count ++;
 							frame.dispose();
 							CreateExamGUI parrentFrame = new CreateExamGUI(userName);
 							frame = new JDialog(parrentFrame, true);
 							frame.setUndecorated(true);
-							frame.addWindowListener(new WindowAdapter() {
-					            public void windowClosing(WindowEvent e) {
-					            	int select = JOptionPane.showConfirmDialog(null, "Thao tác này sẽ xoá đề thi bạn vừa tạo!!", "Lựa chọn của bạn", JOptionPane.YES_NO_OPTION);
-					        		if (select == JOptionPane.YES_OPTION) {
-					        			boolean checkDelCauHoi;
-					        			boolean checkDelDeThi;
-					    				try {
-					    					new ConnectServer(socket, out, in).readCauHoiByMaDeThi(CreateExamGUI.maDeThi, "readCauHoi");
-					    					System.out.println(CauHoiBUS.arrCauHoi);
-					    					Thread.sleep(1000);
-					    					ArrayList<Integer> stt = new CauHoiBUS().getSTTByMaDeThi(CreateExamGUI.maDeThi);
-					    					System.out.println(stt);
-					    					for(int i = 0; i < stt.size(); i++) {
-					    						checkDelCauHoi = new ConnectServer(socket, out, in).delCauHoi(stt.get(i), CreateExamGUI.maDeThi, "delCauHoi");
-					    					}
-					    					if(checkDelDeThi = new ConnectServer(socket, out, in).delDeThi(CreateExamGUI.maDeThi, "delDeThi") == true) {
-					    						frame.dispose();
-					    					}
-					    				} catch (IOException ex) {
-					    					ex.printStackTrace();
-					    				} catch (InterruptedException ex) {
-					    					ex.printStackTrace();
-					    				}
-					        		}
-					            }
-					        });
 							frame.getContentPane().add(JPanelCauHoi(soCauHoi, thoiGianThi, count));
 							frame.pack();
 							frame.setSize(650, 500);
@@ -442,8 +401,9 @@ public class CreateExamGUI extends JFrame
 		lbSoCau.setFont(new Font("Arial", Font.BOLD, 14));
 		p.add(lbSoCau);
 		
-		String[] SoCau = {"5", "10", "15", "20", "30", "40"};
+		String[] SoCau = {"10", "15", "20", "30", "40"};
 		comboSoCau = new JComboBox<>(SoCau);
+		comboSoCau.setEnabled(false);
 		comboSoCau.setBounds(lbSoCau.getX() + lbSoCau.getWidth(), lbSoCau.getY(), 100, 30);
 		p.add(comboSoCau);
 		
@@ -453,7 +413,7 @@ public class CreateExamGUI extends JFrame
 		lbThoiGian.setFont(new Font("Arial", Font.BOLD, 14));
 		p.add(lbThoiGian);
 		
-		String[] ThoiGian = {"5","10", "15", "20", "30", "60", "90"};
+		String[] ThoiGian = {"10", "20", "30", "60", "90"};
 		comboThoiGian = new JComboBox<>(ThoiGian);
 		comboThoiGian.setBounds(lbThoiGian.getX() + lbThoiGian.getWidth(), lbThoiGian.getY(), 100, 30);
 		p.add(comboThoiGian);
@@ -468,6 +428,8 @@ public class CreateExamGUI extends JFrame
 		txtTenDeThi.setBounds(lbTenDeThi.getX() + lbTenDeThi.getWidth() + 10, lbTenDeThi.getY(), 300, 80);
 		txtTenDeThi.setFont(new Font("Arial", 0, 16));
 		txtTenDeThi.setBorder(BorderFactory.createLineBorder(Color.black));
+		txtTenDeThi.setLineWrap(true);
+		txtTenDeThi.setWrapStyleWord(true);
 		p.add(txtTenDeThi);
 		
 		btnContinue = new JPanel();
@@ -529,6 +491,8 @@ public class CreateExamGUI extends JFrame
 		txtCauHoi.setBounds(lbCauHoi.getX(), lbSTT.getY() + lbSTT.getHeight() + 20, 590, 80);
 		txtCauHoi.setFont(new Font("Arial", 0, 16));
 		txtCauHoi.setBorder(BorderFactory.createLineBorder(Color.black));
+		txtTenDeThi.setLineWrap(true);
+		txtTenDeThi.setWrapStyleWord(true);
 		p.add(txtCauHoi);
 		
 		groupDapAn = new ButtonGroup();
@@ -543,6 +507,8 @@ public class CreateExamGUI extends JFrame
 		txtA.setBounds(rdA.getX() + rdA.getWidth(), rdA.getY(), 230, 40);
 		txtA.setFont(new Font("Arial", 0, 16));
 		txtA.setBorder(BorderFactory.createLineBorder(Color.black));
+		txtA.setLineWrap(true);
+		txtA.setWrapStyleWord(true);
 		p.add(txtA);
 		
 		rdB = new JRadioButton("B/ ");
@@ -556,6 +522,8 @@ public class CreateExamGUI extends JFrame
 		txtB.setBounds(rdB.getX() + rdB.getWidth(), rdB.getY(), 230, 40);
 		txtB.setFont(new Font("Arial", 0, 16));
 		txtB.setBorder(BorderFactory.createLineBorder(Color.black));
+		txtB.setLineWrap(true);
+		txtB.setWrapStyleWord(true);
 		p.add(txtB);
 		
 		rdC = new JRadioButton("C/ ");
@@ -569,6 +537,8 @@ public class CreateExamGUI extends JFrame
 		txtC.setBounds(rdC.getX() + rdC.getWidth(), rdC.getY(), 230, 40);
 		txtC.setFont(new Font("Arial", 0, 16));
 		txtC.setBorder(BorderFactory.createLineBorder(Color.black));
+		txtC.setLineWrap(true);
+		txtC.setWrapStyleWord(true);
 		p.add(txtC);
 		
 		rdD = new JRadioButton("D/ ");
@@ -582,6 +552,8 @@ public class CreateExamGUI extends JFrame
 		txtD.setBounds(rdD.getX() + rdD.getWidth(), rdD.getY(), 230, 40);
 		txtD.setFont(new Font("Arial", 0, 16));
 		txtD.setBorder(BorderFactory.createLineBorder(Color.black));
+		txtD.setLineWrap(true);
+		txtD.setWrapStyleWord(true);
 		p.add(txtD);
 		
 		JLabel lbDapAn = new JLabel("Đáp Án: ");
@@ -593,18 +565,20 @@ public class CreateExamGUI extends JFrame
 		txtDapAn.setBounds(lbDapAn.getX() + lbDapAn.getWidth(), lbDapAn.getY(), 230, 40);
 		txtDapAn.setFont(new Font("Arial", 0, 16));
 		txtDapAn.setBorder(BorderFactory.createLineBorder(Color.black));
+		txtDapAn.setLineWrap(true);
+		txtDapAn.setWrapStyleWord(true);
 		p.add(txtDapAn);
 		
-		btnCancel = new JPanel();
-		btnCancel.setBackground(BGChinh);
-		btnCancel.setName("Cancel");
-		btnCancel.setBounds((p.getWidth() / 2), txtDapAn.getY() + txtDapAn.getHeight() + 50, 80, 30);
-		btnCancel.addMouseListener(MouseBtnCancel);
-		JLabel lb1 = new JLabel("Cancel");
+		btnDelete = new JPanel();
+		btnDelete.setBackground(BGChinh);
+		btnDelete.setName("Delete");
+		btnDelete.setBounds((p.getWidth() / 2), txtDapAn.getY() + txtDapAn.getHeight() + 50, 80, 30);
+		btnDelete.addMouseListener(MouseBtnDelete);
+		JLabel lb1 = new JLabel("Delete");
 		lb1.setFont(new Font("Arial", 1, 16));
 		lb1.setForeground(Color.white);
-		btnCancel.add(lb1);
-		p.add(btnCancel);
+		btnDelete.add(lb1);
+		p.add(btnDelete);
 		
 		btn = new JPanel();
 		btn.setBackground(BGChinh);
@@ -616,6 +590,13 @@ public class CreateExamGUI extends JFrame
 		lb2.setForeground(Color.white);
 		btn.add(lb2);
 		p.add(btn);
+		
+		txtCauHoi.setText(CauHoiBUS.arrCauHoi.get(stt).getTenCauHoi());
+		txtA.setText(CauHoiBUS.arrCauHoi.get(stt).getCauA());
+		txtB.setText(CauHoiBUS.arrCauHoi.get(stt).getCauB());
+		txtC.setText(CauHoiBUS.arrCauHoi.get(stt).getCauC());
+		txtD.setText(CauHoiBUS.arrCauHoi.get(stt).getCauD());
+		txtDapAn.setText(CauHoiBUS.arrCauHoi.get(stt).getDapAn());
 		
 		return p;
 	}

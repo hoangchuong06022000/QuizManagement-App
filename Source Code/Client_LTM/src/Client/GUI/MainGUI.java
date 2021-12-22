@@ -13,10 +13,16 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -29,9 +35,11 @@ import javax.swing.JPanel;
 import Client.BUS.CauHoiBUS;
 import Client.BUS.ConnectServer;
 import Client.BUS.DeThiBUS;
+import Client.BUS.DiemBUS;
 import Client.BUS.UserBUS;
 import models.CauHoiDTO;
 import models.DeThiDTO;
+import models.DiemDTO;
 
 
 public class MainGUI extends JFrame
@@ -51,7 +59,7 @@ public class MainGUI extends JFrame
 	public Color BGPhu = new Color(232, 233, 236);
 	public Color BGCam = new Color(255, 165, 0);
 	public String LuaChon, TrangHienTai;
-	public int SoDeToiDa = 6;
+	public int SoDeToiDa = 2;
 	public static int SoTrang = 0;
 		
 	public MouseAdapter MouseEV = new MouseAdapter() 
@@ -88,7 +96,7 @@ public class MainGUI extends JFrame
             switch (src.getName()) {
 				case "Tham gia thi":{
 					try {
-						conn = new ConnectServer(socket, "readDeThi", out, in);
+					    conn = new ConnectServer(socket, "readDeThi", out, in);
 						SetBGDanhMuc();
 						pnDanhMuc[0].setBackground(BGCam);
 	        			LuaChon = src.getName().toString();
@@ -98,6 +106,10 @@ public class MainGUI extends JFrame
 					} catch (IOException e) {	
 						e.printStackTrace();
 					} catch (InterruptedException e) {
+						e.printStackTrace();
+					} catch (InvalidKeyException | NoSuchPaddingException | NoSuchAlgorithmException
+							| InvalidAlgorithmParameterException | BadPaddingException
+							| IllegalBlockSizeException e) {
 						e.printStackTrace();
 					}
 				}
@@ -205,10 +217,12 @@ public class MainGUI extends JFrame
         pLeft.setBackground(BGChinh);
         pLeft.setPreferredSize(new Dimension(250, 0));
         
+        LoadBoDeThi();
+        
         pCenter = JPanelThamGiaThi();
         pCenter.setBackground(Color.white);
         pCenter.setPreferredSize(new Dimension(0, 0));
-        
+                
         add(pLeft, BorderLayout.WEST);
         add(pCenter, BorderLayout.CENTER);
     }
@@ -256,6 +270,8 @@ public class MainGUI extends JFrame
     	pDown.setPreferredSize(new Dimension(0, 50));
     	pDown.setBackground(Color.white);
     	
+    	LoadBoDeThi();
+
 		pnPhanTrang = new JPanel[SoTrang];
 		for(int i = 0; i < SoTrang; i++)
 		{
@@ -272,7 +288,6 @@ public class MainGUI extends JFrame
 			}
 			pDown.add(pnPhanTrang[i]);
 		}
-    	
     	
     	p.add(pBoDeThi, BorderLayout.CENTER);
     	p.add(pDown, BorderLayout.SOUTH);
@@ -329,7 +344,7 @@ public class MainGUI extends JFrame
 		
 		JLabel lbNguoiLam = new JLabel("Người tạo : " + De.getUserName());
 		pn.add(lbNguoiLam);
-		
+				
 		pCenter.add(pn);
     	
     	
@@ -351,7 +366,14 @@ public class MainGUI extends JFrame
     		JButton btnSua = new JButton("Sửa");
     		btnSua.setName(De.getMaDeThi());
         	pDown.add(btnSua);
+        	btnSua.addActionListener(new ActionListener() {
+    			@Override
+    			public void actionPerformed(ActionEvent e) {
+    				SuaDeThi(De.getMaDeThi());
+    			}
+    		});
     	}
+    	
 		
     	
     	p.add(pUp, BorderLayout.NORTH);
@@ -402,16 +424,63 @@ public class MainGUI extends JFrame
 	
 	public void ThucHienThi(String maDeThi)
     {		
+		new ConnectServer(socket, out, in).readDiemByMaDeThi(maDeThi, "readDiemByMaDe");
+		DiemBUS bus = new DiemBUS();
+		for(DiemDTO Diem : bus.arrDiemByMaDe)
+		{
+			if(Diem.getUserName().equals(LoginGUI.current_user.getUserName()))
+			{
+				JOptionPane.showMessageDialog(null, "Bạn đã làm đề thi này rồi");
+				return;
+			}
+		}
 		new ConnectServer(socket, out, in).readCauHoiByMaDeThi(maDeThi, "readCauHoi");
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
+		DeThiDTO DeThi = new DeThiDTO("", 0, 0, 0, "");
+		for(int i = 0; i < DeThiBUS.arrDeThi.size(); i++){
+			if(DeThiBUS.arrDeThi.get(i).getMaDeThi() == maDeThi){
+				DeThi = DeThiBUS.arrDeThi.get(i);
+			}
+		}
 		ArrayList<CauHoiDTO> arrRandom = new CauHoiBUS().SortRandomCauHoi();
 		MainGUI parrent = new MainGUI(userName);
 		new TakeAnExamGUI(userName, socket, out, in);
+		TakeAnExamGUI.DeThi = DeThi;
 		new TakeAnExamGUI(parrent, arrRandom);	
+    }
+	
+	public void SuaDeThi(String maDeThi)
+    {		
+		new ConnectServer(socket, out, in).readCauHoiByMaDeThi(maDeThi, "readCauHoi");		
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		DeThiDTO DeThi = new DeThiDTO("", 0, 0, 0, "");
+		for(int i = 0; i < DeThiBUS.arrDeThi.size(); i++)
+		{
+			if(DeThiBUS.arrDeThi.get(i).getMaDeThi() == maDeThi)
+			{
+				DeThi = DeThiBUS.arrDeThi.get(i);
+			}
+		}
+		
+		UpdateExamGUI.DeThi = DeThi;
+		UpdateExamGUI.userName = userName;
+		new UpdateExamGUI(socket,out,in).setVisible(true);;
+		
     }
 }

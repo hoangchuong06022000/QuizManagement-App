@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.1
+-- version 5.0.3
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th12 10, 2021 lúc 05:56 PM
--- Phiên bản máy phục vụ: 10.4.22-MariaDB
--- Phiên bản PHP: 8.0.13
+-- Thời gian đã tạo: Th12 22, 2021 lúc 05:07 PM
+-- Phiên bản máy phục vụ: 10.4.14-MariaDB
+-- Phiên bản PHP: 7.4.11
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -107,6 +107,32 @@ INSERT INTO `cauhoi` (`STT`, `maDeThi`, `tenCauHoi`, `cauA`, `cauB`, `cauC`, `ca
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `dethi`
+--
+
+CREATE TABLE `dethi` (
+  `maDeThi` varchar(6) COLLATE utf8_bin NOT NULL,
+  `tenDeThi` varchar(200) COLLATE utf8_bin NOT NULL,
+  `soCauHoi` int(3) NOT NULL,
+  `thoiGianThi` int(3) NOT NULL,
+  `soLuotThi` int(3) NOT NULL,
+  `userName` varchar(100) COLLATE utf8_bin NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+--
+-- Đang đổ dữ liệu cho bảng `dethi`
+--
+
+INSERT INTO `dethi` (`maDeThi`, `tenDeThi`, `soCauHoi`, `thoiGianThi`, `soLuotThi`, `userName`) VALUES
+('DE0001', 'Sự hấp thụ nước và muối khoáng ở rễ', 10, 10, 2, 'hoangchuong06022000@gmail.com'),
+('DE0002', 'Sự tương phản về trình độ phát triển kinh tế - xã hội (phần 1)', 10, 10, 1, 'lengocyen19@gmail.com'),
+('DE0003', 'Tiêu chuẩn trình bày bản vẽ kĩ thuật', 10, 10, 1, 'lynhathao10@gmail.com'),
+('DE0004', 'Thiết kế và bản vẽ kĩ thuật', 10, 10, 1, 'nguyennguyen@gmail.com'),
+('DE0005', 'Sự xuất hiện loài người và bầy người nguyên thủy', 20, 20, 1, 'nguyentuyetnhung09@gmail.com');
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `diem`
 --
 
@@ -131,32 +157,6 @@ INSERT INTO `diem` (`maDeThi`, `userName`, `diem`, `thuHang`) VALUES
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `madethi`
---
-
-CREATE TABLE `dethi` (
-  `maDeThi` varchar(6) COLLATE utf8_bin NOT NULL,
-  `tenDeThi` varchar(200) COLLATE utf8_bin NOT NULL,
-  `soCauHoi` int(3) NOT NULL,
-  `thoiGianThi` int(3) NOT NULL,
-  `soLuotThi` int(3) NOT NULL,
-  `userName` varchar(100) COLLATE utf8_bin NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
---
--- Đang đổ dữ liệu cho bảng `madethi`
---
-
-INSERT INTO `dethi` (`maDeThi`, `tenDeThi`, `soCauHoi`, `thoiGianThi`, `soLuotThi`, `userName`) VALUES
-('DE0001', 'Sinh học 11 Bài 1: Sự hấp thụ nước và muối khoáng ở rễ', 10, 10, 1, 'hoangchuong06022000@gmail.com'),
-('DE0002', 'Địa Lí 11 Bài 1: Sự tương phản về trình độ phát triển kinh tế - xã hội (phần 1)', 10, 10, 1, 'lengocyen19@gmail.com'),
-('DE0003', 'Công nghệ 11 Bài 1: Tiêu chuẩn trình bày bản vẽ kĩ thuật', 10, 10, 1, 'lynhathao10@gmail.com'),
-('DE0004', 'Công nghệ 11 Bài 8: Thiết kế và bản vẽ kĩ thuật', 10, 10, 1, 'nguyennguyen@gmail.com'),
-('DE0005', 'Lịch Sử 10 Bài 1: Sự xuất hiện loài người và bầy người nguyên thủy', 20, 20, 1, 'nguyentuyetnhung09@gmail.com');
-
--- --------------------------------------------------------
-
---
 -- Cấu trúc bảng cho bảng `user`
 --
 
@@ -175,7 +175,8 @@ CREATE TABLE `user` (
 
 INSERT INTO `user` (`userName`, `password`, `hoTen`, `gioiTinh`, `ngSinh`, `trangThai`) VALUES
 ('hoangchuong06022000@gmail.com', '1f5db3015992f698e9bd6ab0f3c08f69', 'Văn Hoàng Chương', 0, '2000-02-06', 1),
-('lengocyen19@gmail.com', '480f9a6abd4c51c88998c547fb544513', 'Lê Ngọc Yến', 1, '2000-10-27', 1),
+('hoangchuong19091999@gmail.com', 'ecffb42b85bb04e01ad2d8ddd22d7884', 'Van Hoang Chuong', 1, '2021-12-22', 1),
+('lengocyen19@gmail.com', '480f9a6abd4c51c88998c547fb544513', 'Lê Ngọc Yến', 0, '2000-10-27', 1),
 ('lynhathao10@gmail.com', 'f9432528d14e67cd86155ac7c314d20c', 'Lý Nhật Hào', 0, '2000-09-28', 1),
 ('nguyennguyen@gmail.com', '66c6883a896b36c3734abccad05d84e1', 'Hoàng Văn Nguyên', 0, '2000-12-01', 1),
 ('nguyentuyetnhung09@gmail.com', '38a54833285327624997eb938c0361d3', 'Nguyễn Tuyết Nhung', 1, '2000-06-16', 1);
@@ -192,18 +193,18 @@ ALTER TABLE `cauhoi`
   ADD KEY `maDeThi` (`maDeThi`);
 
 --
+-- Chỉ mục cho bảng `dethi`
+--
+ALTER TABLE `dethi`
+  ADD PRIMARY KEY (`maDeThi`),
+  ADD KEY `userName` (`userName`);
+
+--
 -- Chỉ mục cho bảng `diem`
 --
 ALTER TABLE `diem`
   ADD PRIMARY KEY (`maDeThi`,`userName`),
   ADD KEY `maDeThi` (`maDeThi`),
-  ADD KEY `userName` (`userName`);
-
---
--- Chỉ mục cho bảng `madethi`
---
-ALTER TABLE `dethi`
-  ADD PRIMARY KEY (`maDeThi`),
   ADD KEY `userName` (`userName`);
 
 --
@@ -223,17 +224,17 @@ ALTER TABLE `cauhoi`
   ADD CONSTRAINT `cauhoi_ibfk_1` FOREIGN KEY (`maDeThi`) REFERENCES `dethi` (`maDeThi`);
 
 --
+-- Các ràng buộc cho bảng `dethi`
+--
+ALTER TABLE `dethi`
+  ADD CONSTRAINT `madethi_ibfk_1` FOREIGN KEY (`userName`) REFERENCES `user` (`userName`);
+
+--
 -- Các ràng buộc cho bảng `diem`
 --
 ALTER TABLE `diem`
   ADD CONSTRAINT `diem_ibfk_1` FOREIGN KEY (`maDeThi`) REFERENCES `dethi` (`maDeThi`),
   ADD CONSTRAINT `diem_ibfk_2` FOREIGN KEY (`userName`) REFERENCES `user` (`userName`);
-
---
--- Các ràng buộc cho bảng `madethi`
---
-ALTER TABLE `dethi`
-  ADD CONSTRAINT `madethi_ibfk_1` FOREIGN KEY (`userName`) REFERENCES `user` (`userName`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

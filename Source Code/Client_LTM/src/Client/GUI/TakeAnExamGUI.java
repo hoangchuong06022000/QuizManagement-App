@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
@@ -24,11 +25,13 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextArea;
 
 import models.CauHoiDTO;
+import models.DeThiDTO;
+import models.DiemDTO;
 
 import Client.BUS.*;
 
-public class TakeAnExamGUI extends JDialog 
-{
+public class TakeAnExamGUI extends JDialog {
+	public static DeThiDTO DeThi;
 	public static ArrayList<CauHoiDTO> arrCauHoi;
 	public static String userName;
 	public static Socket socket;
@@ -100,8 +103,20 @@ public class TakeAnExamGUI extends JDialog
 			count++;
 			if(count == TakeAnExamGUI.arrCauHoi.size()) {
 				diem = (float) 10/TakeAnExamGUI.arrCauHoi.size()*soCauDung;
-				JOptionPane.showMessageDialog(null, "Bạn đã trả lời đúng " + soCauDung + "/" + TakeAnExamGUI.arrCauHoi.size() + "câu\nSố điểm của bạn là: " + diem);
 				timer.cancel();
+				DiemBUS bus = new DiemBUS();
+				int Hang = XepHangTheoMaDeThi(diem);
+				DiemDTO Diem = new DiemDTO(arrCauHoi.get(0).getMaDeThi(), LoginGUI.current_user.getUserName(), diem, Hang);
+				try {
+					new ConnectServer(socket, out, in).addOrModDiem(Diem, "addDiem");
+					int LuotThi = DeThi.getSoLuotThi() + 1;
+					DeThi.setSoLuotThi(LuotThi);
+					new ConnectServer(socket, out, in).addOrModDeThi(DeThi, "modDeThi");
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				JOptionPane.showMessageDialog(null, "Bạn đã hết thời gian thi!!\nSố câu đúng " + soCauDung + "/" + TakeAnExamGUI.arrCauHoi.size() +
+						"câu\nSố điểm của bạn là: " + diem + "\nHạng : " + Hang);
 				frame.dispose();
 			}else {
 				pnCenter.removeAll();
@@ -370,7 +385,23 @@ public class TakeAnExamGUI extends JDialog
 		if (MM == 0 && ss <= 0) {
 			timer.cancel();
 			diem = (float) 10/TakeAnExamGUI.arrCauHoi.size()*soCauDung;
-			JOptionPane.showMessageDialog(null, "Bạn đã hết thời gian thi!!\nSố câu đúng " + soCauDung + "/" + TakeAnExamGUI.arrCauHoi.size() + "câu\nSố điểm của bạn là: " + diem);
+			int Hang = XepHangTheoMaDeThi(diem);
+			DiemDTO Diem = new DiemDTO(arrCauHoi.get(0).getMaDeThi(), LoginGUI.current_user.getUserName(), diem, Hang);
+			try {
+				int LuotThi = DeThi.getSoLuotThi() + 1;
+				DeThi.setSoLuotThi(LuotThi);
+				new ConnectServer(socket, out, in).addOrModDeThi(DeThi, "modDeThi");
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				new ConnectServer(socket, out, in).addOrModDiem(Diem, "addDiem");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			JOptionPane.showMessageDialog(null, "Bạn đã hết thời gian thi!!\nSố câu đúng " + soCauDung + "/" + TakeAnExamGUI.arrCauHoi.size() +
+					"câu\nSố điểm của bạn là: " + diem + "\nHạng : " + Hang);
 			frame.dispose();
 		} 
 		 if(ss <= 0)
@@ -381,4 +412,21 @@ public class TakeAnExamGUI extends JDialog
 		 }
 	    --ss;
 	}
+	public int XepHangTheoMaDeThi(float diem) {
+    	int hang = 1;
+    	for(DiemDTO Diem : DiemBUS.arrDiemByMaDe){
+    		if(Diem.getDiem() > diem){
+    			hang ++;
+    			continue;
+    		}
+    		try {
+    			int ThayDoiHang = Diem.getThuHang();
+    			Diem.setThuHang(ThayDoiHang + 1);
+				new ConnectServer(socket, out, in).addOrModDiem(Diem, "modDiem");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+    	}
+    	return hang;
+    }
 }

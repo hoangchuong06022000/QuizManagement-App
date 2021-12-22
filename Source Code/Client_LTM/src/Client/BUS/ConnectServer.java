@@ -10,12 +10,19 @@ import java.io.ObjectOutputStream;
 import java.io.StreamCorruptedException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-
+import java.util.Base64;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SealedObject;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
 
 
 public class ConnectServer {
@@ -24,15 +31,23 @@ public class ConnectServer {
     public static ObjectInputStream in;
     public static ObjectOutputStream out;
     public static boolean check = false;
-    private ExecuteED exec;
-    //private static SecretKey key;
-    //private static IvParameterSpec iv;
+    public static String publicKey;
+    public ExecuteED exec;
+    public static SecretKey key;
+    public static boolean getPublicKey = true;
 
-    public ConnectServer(Socket socket, String current_session, ObjectOutputStream out, ObjectInputStream in) throws IOException{
+    public ConnectServer(SecretKey key) {
+    	ConnectServer.key = key;
+    }
+    public ConnectServer(Socket socket, String current_session, ObjectOutputStream out, ObjectInputStream in) throws IOException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, BadPaddingException, IllegalBlockSizeException{
         ConnectServer.socket = socket;  
         ConnectServer.current_session = current_session;  
         ConnectServer.out = out; 
         ConnectServer.in = in;
+        if(getPublicKey == true) { //Chỉ nhận public key lần đầu cho từng client
+        	getPublicKeyFromServer();
+        	getPublicKey = false;
+        }
         send(ConnectServer.current_session);
         receive();
         
@@ -42,15 +57,44 @@ public class ConnectServer {
         ConnectServer.out = out; 
         ConnectServer.in = in;
     }
+    public void getPublicKeyFromServer() {
+    	try {
+    		String tmp = in.readUTF();
+    		ConnectServer.publicKey = tmp;
+    		//System.out.println(key);
+    		
+    		String encodedKey = Base64.getEncoder().encodeToString(key.getEncoded());
+			//System.out.println(encodedKey);
+			String key = new RSA(0).encryptRSA(encodedKey, publicKey);
+			out.writeUTF(key);
+            out.flush();
+            //Thread.sleep(1000);
+		} catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException
+				| NoSuchAlgorithmException e) {
+			e.printStackTrace();
+    	}catch (StreamCorruptedException ex) {
+            Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
+    	}catch (SocketException ex) {
+            Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
+    	}catch (IOException ex) {
+            Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
+    	}catch (NullPointerException ex) {
+            Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex); 
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+		} 
+    }
     
     public void receive(){
         Thread thread = new Thread(){
             public void run(){       
             	String line = null;
+            	String msg = null;
 				try {
 					System.err.println("wait receive!!");
 					line = in.readUTF();
-					System.out.println("receive = "+line);
+					msg = new ExecuteED().decryptAES("AES/ECB/PKCS5PADDING", line, key);
+					System.out.println("receive = "+msg);
 				}catch (StreamCorruptedException ex) {
 	                Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
 	        	}catch (EOFException ex) {
@@ -58,18 +102,18 @@ public class ConnectServer {
 	        	}catch (SocketException ex) {
 	                Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
 	        	}catch (NullPointerException ex) {
-	                Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex); 
+	                Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
 	        	}catch (IOException ex) {
 	                Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
 	        	} catch (Exception e) {
 					e.printStackTrace();
 				}
                 try {
-                    switch(line){
+                    switch(msg){
                         case "readUser": {
                         	try {
-                        		Object tmp = in.readObject();
-                                UserBUS.arrUser = (ArrayList<UserDTO>) exec.convertObjectToList(tmp);
+                        		SealedObject tmp = (SealedObject) in.readObject();                        		
+                                UserBUS.arrUser = (ArrayList<UserDTO>) exec.convertObjectToList(new ExecuteED().decryptObjectAES("AES/ECB/PKCS5Padding", tmp, key));
                                 break;
                         	}catch (StreamCorruptedException ex) {
             	                Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -85,8 +129,8 @@ public class ConnectServer {
                         }
                         case "readDeThi": { 
                             try {
-                            	Object tmp = in.readObject();
-                                DeThiBUS.arrDeThi = (ArrayList<DeThiDTO>) exec.convertObjectToList(tmp);                           
+                            	SealedObject tmp = (SealedObject) in.readObject();
+                                DeThiBUS.arrDeThi = (ArrayList<DeThiDTO>) exec.convertObjectToList(new ExecuteED().decryptObjectAES("AES/ECB/PKCS5Padding", tmp, key));                          
                                 break;
                         	}catch (StreamCorruptedException ex) {
             	                Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -102,8 +146,8 @@ public class ConnectServer {
                         }
                         case "readDiem": {
                         	try {
-                        		Object tmp = in.readObject();
-                                DiemBUS.arrDiem = (ArrayList<DiemDTO>) exec.convertObjectToList(tmp);
+                        		SealedObject tmp = (SealedObject) in.readObject(); 
+                                DiemBUS.arrDiem = (ArrayList<DiemDTO>) exec.convertObjectToList(new ExecuteED().decryptObjectAES("AES/ECB/PKCS5Padding", tmp, key));
                                 break;
                         	}catch (StreamCorruptedException ex) {
             	                Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -120,8 +164,8 @@ public class ConnectServer {
                         }
                         case "readDiemByMaDe": {
                         	try {
-                        		Object tmp = in.readObject();
-                                DiemBUS.arrDiemByMaDe = (ArrayList<DiemDTO>) exec.convertObjectToList(tmp);
+                        		SealedObject tmp = (SealedObject) in.readObject(); 
+                                DiemBUS.arrDiemByMaDe = (ArrayList<DiemDTO>) exec.convertObjectToList(new ExecuteED().decryptObjectAES("AES/ECB/PKCS5Padding", tmp, key));
                                 break;
                         	}catch (StreamCorruptedException ex) {
             	                Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -138,8 +182,8 @@ public class ConnectServer {
                         }
                         case "readCauHoi": {
                         	try {
-                        		Object tmp = in.readObject();
-                                CauHoiBUS.arrCauHoi = (ArrayList<CauHoiDTO>) exec.convertObjectToList(tmp);        
+                        		SealedObject tmp = (SealedObject) in.readObject(); 
+                                CauHoiBUS.arrCauHoi = (ArrayList<CauHoiDTO>) exec.convertObjectToList(new ExecuteED().decryptObjectAES("AES/ECB/PKCS5Padding", tmp, key));        
                                 break;
                         	}catch (StreamCorruptedException ex) {
             	                Logger.getLogger(ConnectServer.class.getName()).log(Level.SEVERE, null, ex);
@@ -172,25 +216,11 @@ public class ConnectServer {
         thread.start();
     }
     
-    public void send(String current_session) throws IOException{
-        System.out.println("send :"+current_session);
-        switch(current_session){
-            case "readUser": {
-                out.writeUTF(current_session);
-                out.flush();
-                break;
-            }
-            case "readDeThi": {
-                out.writeUTF(current_session);
-                out.flush();        
-                break;
-            }
-            case "readDiem": {
-                out.writeUTF(current_session);
-                out.flush();
-                break;
-            }
-        }
+    public void send(String current_session) throws IOException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, BadPaddingException, IllegalBlockSizeException{
+    	String cipherText = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", current_session, key);
+    	out.writeUTF(cipherText);
+        System.out.println(cipherText);
+        out.flush();
     }
     
     public void close(){
@@ -205,8 +235,10 @@ public class ConnectServer {
     
     public boolean addOrModUser(UserDTO user, String current_session) throws IOException{   
         try {
-        	out.writeUTF(current_session);
-            out.writeObject(user);
+        	String cipherText = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", current_session, key);
+        	out.writeUTF(cipherText);
+        	SealedObject sealedObject = new ExecuteED().encryptObjectAES("AES/ECB/PKCS5PADDING", user, key);
+            out.writeObject(sealedObject);
             out.flush();
             receive();
             Thread.sleep(1000);
@@ -225,8 +257,10 @@ public class ConnectServer {
     
     public boolean delUser(String userName, String current_session) throws IOException{
     	try {
-    		out.writeUTF(current_session);
-            out.writeUTF(userName);
+    		String cipherText = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", current_session, key);
+    		out.writeUTF(cipherText);
+    		String cipherTextUserName = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", userName, key);
+            out.writeUTF(cipherTextUserName);
             out.flush();
             receive();
             Thread.sleep(1000);
@@ -245,8 +279,10 @@ public class ConnectServer {
     
     public boolean addOrModDeThi(DeThiDTO dethi, String current_session) throws IOException{
     	try {
-    		out.writeUTF(current_session);
-            out.writeObject(dethi);
+    		String cipherText = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", current_session, key);
+        	out.writeUTF(cipherText);
+        	SealedObject sealedObject = new ExecuteED().encryptObjectAES("AES/ECB/PKCS5PADDING", dethi, key);
+            out.writeObject(sealedObject);
             out.flush();   
             receive();
             Thread.sleep(1000);
@@ -264,8 +300,10 @@ public class ConnectServer {
     
     public boolean delDeThi(String maDeThi, String current_session) throws IOException{
     	try {
-    		out.writeUTF(current_session);
-            out.writeUTF(maDeThi);
+    		String cipherText = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", current_session, key);
+    		out.writeUTF(cipherText);
+    		String cipherTextMaDeThi = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", maDeThi, key);
+            out.writeUTF(cipherTextMaDeThi);
             out.flush();
             receive();
             Thread.sleep(1000);
@@ -284,8 +322,10 @@ public class ConnectServer {
     
     public boolean addOrModDiem(DiemDTO diem, String current_session) throws IOException{
     	try {
-    		out.writeUTF(current_session);
-            out.writeObject(diem);
+    		String cipherText = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", current_session, key);
+        	out.writeUTF(cipherText);
+        	SealedObject sealedObject = new ExecuteED().encryptObjectAES("AES/ECB/PKCS5PADDING", diem, key);
+            out.writeObject(sealedObject);
             out.flush();
             receive();
             Thread.sleep(1000);
@@ -304,9 +344,12 @@ public class ConnectServer {
     
     public boolean delDiem(String maDeThi, String userName, String current_session) throws IOException{
     	try {
-    		out.writeUTF(current_session);
-            out.writeUTF(maDeThi);
-            out.writeUTF(userName);
+    		String cipherText = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", current_session, key);
+        	out.writeUTF(cipherText);
+    		String cipherTextMaDeThi = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", maDeThi, key);
+            out.writeUTF(cipherTextMaDeThi);
+    		String cipherTextUserName = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", userName, key);
+            out.writeUTF(cipherTextUserName);
             out.flush();
             receive();
             Thread.sleep(1000);
@@ -325,8 +368,11 @@ public class ConnectServer {
     
     public void readDiemByMaDeThi(String maDeThi, String current_session ){
     	try {
-    		out.writeUTF(current_session);
-            out.writeUTF(maDeThi);
+    		System.out.println(current_session);
+    		String cipherText = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", current_session, key);
+    		out.writeUTF(cipherText);
+    		String cipherTextMaDeThi = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", maDeThi, key);
+            out.writeUTF(cipherTextMaDeThi);
             out.flush();
             receive();
             Thread.sleep(1000);
@@ -343,8 +389,11 @@ public class ConnectServer {
     
     public void readCauHoiByMaDeThi(String maDeThi, String current_session ){
     	try {
-    		out.writeUTF(current_session);
-            out.writeUTF(maDeThi);
+    		System.out.println(current_session);
+    		String cipherText = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", current_session, key);
+    		out.writeUTF(cipherText);
+    		String cipherTextMaDeThi = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", maDeThi, key);
+            out.writeUTF(cipherTextMaDeThi);
             out.flush();
             receive();
             Thread.sleep(1000);
@@ -361,8 +410,10 @@ public class ConnectServer {
     
     public boolean addOrModCauHoi(CauHoiDTO cauHoi, String current_session) throws IOException{
     	try {
-    		out.writeUTF(current_session);
-            out.writeObject(cauHoi);
+    		String cipherText = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", current_session, key);
+        	out.writeUTF(cipherText);
+        	SealedObject sealedObject = new ExecuteED().encryptObjectAES("AES/ECB/PKCS5PADDING", cauHoi, key);
+            out.writeObject(sealedObject);
             out.flush();
             receive();
             Thread.sleep(1000);
@@ -381,9 +432,12 @@ public class ConnectServer {
     
     public boolean delCauHoi(int stt, String maDeThi, String current_session) throws IOException{
     	try {
-    		out.writeUTF(current_session);
-            out.writeUTF(String.valueOf(stt));
-            out.writeUTF(maDeThi);
+    		String cipherText = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", current_session, key);
+    		out.writeUTF(cipherText);
+    		String cipherTextSTT = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", String.valueOf(stt), key);
+            out.writeUTF(cipherTextSTT);
+    		String cipherTextMaDeThi = new ExecuteED().encryptAES("AES/ECB/PKCS5PADDING", maDeThi, key);
+            out.writeUTF(cipherTextMaDeThi);
             out.flush();
             receive();
             Thread.sleep(1000);

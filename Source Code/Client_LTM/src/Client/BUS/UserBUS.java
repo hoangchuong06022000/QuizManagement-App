@@ -67,9 +67,22 @@ public class UserBUS {
     public String checkTK(String userName, String passHashed) {
     	for(UserDTO u : arrUser) {
     		if(u.getUserName().equals(userName) && u.getPassword().equals(passHashed)) {
-    			return u.getUserName();
+    			if(u.isTrangThai() == 1) {
+    				return u.getUserName();
+    			}else {
+    				return "lock";
+    			}
     		}
     	}
     	return "";
+    }
+    
+    public UserDTO getUser(String userName, String passHashed) {
+    	for(UserDTO u : arrUser) {
+    		if(u.getUserName().equals(userName) && u.getPassword().equals(passHashed)) {
+        		return u;
+    		}
+    	}
+    	return null;
     }
 }

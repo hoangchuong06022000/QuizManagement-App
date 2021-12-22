@@ -15,6 +15,9 @@ import java.io.ObjectOutputStream;
 import java.io.StreamCorruptedException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -23,6 +26,10 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -44,6 +51,7 @@ import models.*;
 
 
 public class LoginGUI extends JFrame {
+	public static UserDTO current_user;
 	private static String host = "localhost";
     private static int port = 2000;
     public static String current_session = "";
@@ -94,8 +102,14 @@ public class LoginGUI extends JFrame {
                 pnDangKy.setBackground(BGPhu);
                 lbDangKy.setForeground(Color.GRAY);
                 try {
-					conn = new ConnectServer(socket, "readUser", out, in);
+                	Thread.sleep(500);
+                	conn = new ConnectServer(socket, "readUser", out, in);
+				} catch (InvalidKeyException | NoSuchPaddingException | NoSuchAlgorithmException
+						| InvalidAlgorithmParameterException | BadPaddingException | IllegalBlockSizeException e1) {
+					e1.printStackTrace();
 				} catch (IOException e1) {
+					e1.printStackTrace();
+				} catch (InterruptedException e1) {
 					e1.printStackTrace();
 				}
                 CapNhatNoiDung(src);
@@ -163,12 +177,13 @@ public class LoginGUI extends JFrame {
     }
     public LoginGUI() {
         init();
-        current_session = "readUser";
 		try {
+			SecretKey key = new ExecuteED().generateSecretKey(128);
+			conn = new ConnectServer(key);
         	socket = new Socket(host, port);
         	out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
-        	conn = new ConnectServer(socket, current_session, out, in);
+            conn = new ConnectServer(socket, "readUser", out, in);
 		}catch (StreamCorruptedException ex) {
             Logger.getLogger(LoginGUI.class.getName()).log(Level.SEVERE, null, ex);
     	}catch (EOFException ex) {
@@ -364,12 +379,17 @@ public class LoginGUI extends JFrame {
     	String passHashed = new ExecuteED().hashMD5(pass);
     	String user = new UserBUS().checkTK(userName, passHashed);
     	if(check_input(userName, pass) == true) {
-    		if(!user.equals("")) {
-    			new MainGUI(user);
-    			return true;
+    		if(user.equals("lock")) {
+    			JOptionPane.showMessageDialog(null, "Tài khoản của bạn đã bị khoá!!");
     		}else {
-                JOptionPane.showMessageDialog(null, "UserName hoặc Password không chính xác!!");
-        	} 
+    			if(!user.equals("")) {
+        			current_user = new UserBUS().getUser(userName, passHashed);
+        			new MainGUI(user);
+        			return true;
+        		}else {
+                    JOptionPane.showMessageDialog(null, "UserName hoặc Password không chính xác!!");
+            	} 
+    		}
     	}else{
     		JOptionPane.showMessageDialog(null, error_mess);
         }   
@@ -384,6 +404,7 @@ public class LoginGUI extends JFrame {
 	        	JOptionPane.showMessageDialog(null, "Đăng nhập thành công!!");					
 				this.dispose(); 
 				Thread.sleep(1000);
+				conn = new ConnectServer(socket, "LoginSuccess", out, in);
 				new MainGUI(socket , out, in).setVisible(true);
 			}catch (StreamCorruptedException ex) {
                 Logger.getLogger(LoginGUI.class.getName()).log(Level.SEVERE, null, ex);
@@ -408,14 +429,30 @@ public class LoginGUI extends JFrame {
             error_mess = "User Name phải là email!!!";
             return false;
         } 
+		else if (userName.contains("'") || userName.contains("\"") || userName.contains("#") 
+				|| userName.contains("%") || userName.contains("`") || userName.contains("$")){
+            error_mess = "User Name không hợp lệ!!!";
+            return false;
+        } 
 		else if (password.equals("")){
             error_mess = "Password trống!!!";
+            return false;
+        }
+		else if (password.contains("'") || password.contains("\"") || password.contains("#") 
+				|| password.contains("%") || password.contains("`") || password.contains("$")){
+            error_mess = "Password không hợp lệ!!!";
             return false;
         } 
         else if (re_password.equals("")){
             error_mess = "Bạn chưa nhập lại password!!!";
             return false;
-        }else if(!password.equals(re_password)) {
+        }
+        else if (re_password.contains("'") || re_password.contains("\"") || re_password.contains("#") 
+				|| re_password.contains("%") || re_password.contains("`") || re_password.contains("$")){
+            error_mess = "Re-Password không hợp lệ!!!";
+            return false;
+        } 
+        else if(!password.equals(re_password)) {
         	error_mess = "Password nhập lại không trùng khớp!!!";
             return false;
         }
@@ -423,12 +460,22 @@ public class LoginGUI extends JFrame {
             error_mess = "Họ Tên trống!!!";
             return false;
         } 
-        
+        else if (hoTen.contains("'") || hoTen.contains("\"") || hoTen.contains("#") 
+				|| hoTen.contains("%") || hoTen.contains("`") || hoTen.contains("$")){
+            error_mess = "Họ Tên không hợp lệ!!!";
+            return false;
+        } 
         return true;
 	}
     
     public void btnDangKyActionPerformed(java.awt.event.ActionEvent evt) {
     	String userName = txtUser.getText();
+    	for(UserDTO user : UserBUS.arrUser){
+			if(user.getUserName().equals(userName)){
+				JOptionPane.showMessageDialog(null, "Tài khoản này đã được đăng ký");
+				return;
+			}
+		}
     	String password = txtPass.getText();
     	String passwordHashed = new ExecuteED().hashMD5(password);
     	String re_password = txtXacNhan.getText();
@@ -437,10 +484,10 @@ public class LoginGUI extends JFrame {
     	String ngSinh = String.valueOf(formater.format(txtNgaySinh.getDate()));
     	int gioiTinh = 0;
     	if (rdNam.isSelected()){
-            gioiTinh = 1;
+            gioiTinh = 0;
     	}
     	if (rdNu.isSelected()){
-    		gioiTinh = 0;
+    		gioiTinh = 1;
     	}
     	if(checkInputDangKy(userName, password, hoTen, re_password)) {
     		JOptionPane.showMessageDialog(null, "Đang gửi mã OTP đến email của bạn!!\n Vui lòng chờ đến khi có thông báo!!");
@@ -529,7 +576,7 @@ public class LoginGUI extends JFrame {
 		txtOTP.setFont(new Font("Arial", Font.BOLD, 15));
 		p.add(txtOTP);
 		
-		int ThoiGian = 2;
+		int ThoiGian = 9;
 		String s_ThoiGian = "";
 		if(ThoiGian < 10)
 			s_ThoiGian = "0" + ThoiGian;

@@ -11,6 +11,8 @@ public class UserDTO implements Serializable{
 	String userName, password, hoTen, ngSinh;
     int gioiTinh;
     int trangThai;
+    
+    public UserDTO() {}
 
     public UserDTO(String password, String hoTen, int gioiTinh, String ngSinh, int trangThai) {
         this.password = password;
